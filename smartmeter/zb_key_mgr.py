@@ -93,11 +93,10 @@ class ZbKeyMgr(object):
     #Entry 0     (>)F000000000000000  00000000  L     n     F0 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00
     #1/6 entries used.
 
-    def __init__(self, max_num_keys=6, prompt='smartmeter>'):
+    def __init__(self, max_num_keys=6):
         self.logger = logger.Logger('zbkeymgr')
         self.max_num_keys = max_num_keys
         self.min_rsp_lines = 9
-        self.prompt = prompt
         self.last_req = 0
         self.cache_duration = 60*5
         # FIXME: refresh_cache not used yet
@@ -107,7 +106,7 @@ class ZbKeyMgr(object):
         self.link_keys = []
         self.link_keys_to_add = []
         self.lock = threading.Lock()
-        start_tag = self.prompt + 'keys print'
+        start_tag = r'EMBER_SECURITY_LEVEL: .*'
         entries_tag = r'[0-9]*/([0-9]*) entries used.'
         self.mrsp = multiline_rsp.MultilineResponseBuilder(start_tag, entries_tag, self.min_rsp_lines + self.max_num_keys, self._extract_multiline_response)
 
