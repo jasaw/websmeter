@@ -6,6 +6,7 @@ import os
 from smartmeter import smartmeter
 import drlc
 import keys
+import nwk
 
 # to avoid any path issues, "cd" to the web root.
 web_root = os.path.abspath(os.path.dirname(__file__))
@@ -15,6 +16,7 @@ urls = (
     "/(.*)/", "redirect",
     "/drlc", drlc.handler,
     "/keys", keys.handler,
+    "/nwk", nwk.handler,
     "/", "index"
 )
 

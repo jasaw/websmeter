@@ -1,0 +1,95 @@
+$def with ()
+$var jsfiles: nwk.js
+$var cssfiles:
+
+<div id="nwk-form-join-form" title="Form/Join a Network">
+	<p id="nwk-form-join-form-tips"></p>
+	<form>
+		<fieldset>
+			<div>
+				<label for="radiochannel">Radio channel</label>
+				<input type="text" name="radiochannel" id="radiochannel" value="" class="text ui-widget-content ui-corner-all" title="Number between 11 and 26" />
+			</div>
+			<div>
+				<label for="radiopower">Radio power</label>
+				<input type="text" name="radiopower" id="radiopower" value="" class="text ui-widget-content ui-corner-all" title="Number between 0 and 3" />
+			</div>
+			<div>
+				<label for="panid">PAN ID</label>
+				<input type="text" name="panid" id="panid" value="" class="text ui-widget-content ui-corner-all" />
+			</div>
+		</fieldset>
+	</form>
+</div>
+
+<div id="permit-join-form" title="Permit Join">
+	<p id="permit-join-form-tips"></p>
+	<form>
+		<fieldset>
+			<div>
+				<label for="pjoinduration">Permit join duration (in seconds)</label>
+				<input type="text" name="pjoinduration" id="pjoinduration" value="" class="text ui-widget-content ui-corner-all" title="0 to disable, 255 to always on" />
+			</div>
+			<div>
+				<input type="checkbox" name="bcastpjoin" id="bcastpjoin" value="broadcast">Broadcast permit join<br>
+			</div>
+		</fieldset>
+	</form>
+</div>
+
+<div id="update-expan-id-form" title="Set Extended PAN ID">
+	<p id="update-expan-id-form-tips"></p>
+	<form>
+		<fieldset>
+			<div>
+				<label for="expanid">Extended PAN ID</label>
+				<input type="text" name="expanid" id="expanid" value="" class="text ui-widget-content ui-corner-all" />
+			</div>
+		</fieldset>
+	</form>
+</div>
+
+<div id="nwk-leave-confirm" title="Leave network?">
+	<p><span class="ui-icon ui-icon-alert" style="float: left; margin: 0 7px 20px 0;"></span>This action will permanently leave the ZigBee network. Are you sure?</p>
+</div>
+
+<div id="current-keys" class="ui-widget">
+	<h1>Network Information:</h1>
+	<div>
+		<label for="mynwkstatus">Network Status: </label>
+		<label id="mynwkstatus"></label>
+	</div>
+	<div>
+		<label for="mymacaddr">MAC Address: </label>
+		<label id="mymacaddr"></label>
+	</div>
+	<div>
+		<label for="mynodeid">Node ID: </label>
+		<label id="mynodeid"></label>
+	</div>
+	<div>
+		<label for="myendpoint">End Point: </label>
+		<label id="myendpoint"></label>
+	</div>
+	<div>
+		<label for="mypanid">PAN ID: </label>
+		<label id="mypanid"></label>
+	</div>
+	<div>
+		<label for="myexpanid">Extended PAN ID: </label>
+		<label id="myexpanid"></label>
+	</div>
+	<div>
+		<label for="myradiochannel">Radio Channel: </label>
+		<label id="myradiochannel"></label>
+	</div>
+	<div>
+		<label for="myradiopower">Radio Power: </label>
+		<label id="myradiopower"></label>
+	</div>
+</div>
+
+<button id="nwk-form-join">Form/Join a Network</button>
+<button id="permit-join">Permit Join</button>
+<button id="update-expan-id">Set Extended PAN ID</button>
+<button id="nwk-leave">Leave Network</button>
