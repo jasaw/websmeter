@@ -46,7 +46,7 @@ class MultilineResponseBuilder(object):
             self.lines_so_far.append(rsp_line)
             accepted = True
         if len(self.lines_so_far) >= self.max_num_lines:
-            self.logger.log('warning: too many response lines')
+            #self.logger.log('warning: too many response lines')
             self.response_handler(self.start_match, self.end_match, self.lines_so_far)
             self._reset_state()
         return accepted
