@@ -59,7 +59,7 @@ $(document).ready(function() {
 				}
 			},
 			error : function(response) {
-				alert(response.responseText);
+				alert(response.errormsg);
 			}
 		});
 	}
@@ -72,12 +72,15 @@ $(document).ready(function() {
 			"Add/Update link key": function() {
 				var bValid = true;
 				allFields.removeClass( "ui-state-error" );
-				bValid = bValid && checkLength( addmacaddr, "addmacaddr", 16 );
-				bValid = bValid && checkLength( addpreconfkey, "addpreconfkey", 32 );
+				bValid = bValid && checkLength( addmacaddr, "MAC address", 16 );
 				bValid = bValid && checkRegexp( addmacaddr, /^([0-9a-fA-F])+$/, "MAC address must be in hex." );
+				bValid = bValid && checkLength( addpreconfkey, "pre-configured link key", 32 );
 				bValid = bValid && checkRegexp( addpreconfkey, /^([0-9a-fA-F])+$/, "Link key must be in hex." );
 				if ( bValid ) {
-					var args = '{"mac":"' + addmacaddr.val() + '", "key":"' + addpreconfkey.val() + '"}';
+					var jsonData = {};
+					jsonData["mac"] = addmacaddr.val();
+					jsonData["key"] = addpreconfkey.val();
+					var args = JSON.stringify(jsonData);
 					//alert(args);
 					$( this ).dialog( "close" );
 					$.ajax({
@@ -93,7 +96,7 @@ $(document).ready(function() {
 							}
 						},
 						error : function(response) {
-							alert(response.responseText);
+							alert(response.errormsg);
 						}
 					});
 				}
@@ -115,10 +118,12 @@ $(document).ready(function() {
 			"Remove link key": function() {
 				var bValid = true;
 				allFields.removeClass( "ui-state-error" );
-				bValid = bValid && checkLength( rmmacaddr, "rmmacaddr", 16 );
+				bValid = bValid && checkLength( rmmacaddr, "MAC address", 16 );
 				bValid = bValid && checkRegexp( rmmacaddr, /^([0-9a-fA-F])+$/, "MAC address must be in hex." );
 				if ( bValid ) {
-					var args = '{"mac":"' + rmmacaddr.val() + '"}';
+					var jsonData = {};
+					jsonData["mac"] = rmmacaddr.val();
+					var args = JSON.stringify(jsonData);
 					//alert(args);
 					$( this ).dialog( "close" );
 					$.ajax({
@@ -134,7 +139,7 @@ $(document).ready(function() {
 							}
 						},
 						error : function(response) {
-							alert(response.responseText);
+							alert(response.errormsg);
 						}
 					});
 				}

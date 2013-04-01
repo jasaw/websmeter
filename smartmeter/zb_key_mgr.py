@@ -93,6 +93,9 @@ class ZbKeyMgr(object):
     #Entry 0     (>)F000000000000000  00000000  L     n     F0 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00
     #1/6 entries used.
 
+    #test-harness key-update now
+    #cbke start <nodeid> <dst endpoint>
+
     def __init__(self, max_num_keys=6):
         self.logger = logger.Logger('zbkeymgr')
         self.max_num_keys = max_num_keys
@@ -109,6 +112,9 @@ class ZbKeyMgr(object):
         start_tag = r'EMBER_SECURITY_LEVEL: .*'
         entries_tag = r'[0-9]*/([0-9]*) entries used.'
         self.mrsp = multiline_rsp.MultilineResponseBuilder(start_tag, entries_tag, self.min_rsp_lines + self.max_num_keys, self._extract_multiline_response)
+
+    def _expire_cache(self):
+        self.last_req = 0
 
     def _find_link_key_in_list(self, key_list, mac):
         for k in key_list:
@@ -187,6 +193,9 @@ class ZbKeyMgr(object):
                 return True
             self.lock.release()
         return False
+
+    # TODO: support switch network key
+    #test-harness key-update now
 
     def _mac_link_key_are_valid(self, mac, linkkey):
         return mac != INVALID_MAC and linkkey != INVALID_LINK_KEY
@@ -268,6 +277,6 @@ class ZbKeyMgr(object):
 
         now = time.time()
         if self.refresh_cache or now - self.last_req > self.cache_duration:
-            self.last_req = time.time()
+            self.last_req = now
             cmds.append('keys print\n')
         return cmds
