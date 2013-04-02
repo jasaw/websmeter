@@ -133,10 +133,10 @@ class ZbNwkMgr(object):
         self.last_req = 0
 
     def _extract_matched_node_info(self, match):
-        self.my_zb_nwk_info.set_nwk_info(mac=match.group(1), radio_channel=int(match.group(2)), radio_power=int(match.group(3)))
+        self.my_zb_nwk_info.set_nwk_info(mac=match.group(1).upper(), radio_channel=int(match.group(2)), radio_power=int(match.group(3)))
 
     def _extract_matched_nwk_info(self, match):
-        self.my_zb_nwk_info.set_nwk_info(pan_id=int(match.group(1),16), node_id=int(match.group(2),16), expan_id=match.group(3))
+        self.my_zb_nwk_info.set_nwk_info(pan_id=int(match.group(1),16), node_id=int(match.group(2),16), expan_id=match.group(3).upper())
 
     def _extract_matched_endpoint_info(self, match):
         self.my_zb_nwk_info.set_nwk_info(end_point=int(match.group(1)))
@@ -281,7 +281,3 @@ class ZbNwkMgr(object):
             self.pending_cmd = None
         self.lock.release()
         return cmds
-
-
-
-

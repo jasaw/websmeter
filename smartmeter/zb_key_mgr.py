@@ -152,6 +152,8 @@ class ZbKeyMgr(object):
            len(mac) == 16 and all(c in string.hexdigits for c in mac) and \
            len(linkkey) == 32 and all(c in string.hexdigits for c in linkkey) and \
            self._mac_link_key_are_valid(mac, linkkey):
+            mac = mac.upper()
+            linkkey = linkkey.upper()
             self.lock.acquire()
             if len(self.link_keys) + len(self.link_keys_to_add) < self.max_num_keys:
                 k = self._find_link_key_in_list(self.link_keys, mac)
@@ -176,6 +178,7 @@ class ZbKeyMgr(object):
 
     def rm_link_key(self, mac):
         if self.ready and len(mac) == 16 and all(c in string.hexdigits for c in mac):
+            mac = mac.upper()
             self.lock.acquire()
             k = self._find_link_key_in_list(self.link_keys, mac)
             if k is not None:
@@ -221,16 +224,16 @@ class ZbKeyMgr(object):
         #self.logger.log('found nwk key seq %s', seq)
 
     def _extract_nwk_key(self, match):
-        k = match.group(1).replace(' ', '')
+        k = match.group(1).replace(' ', '').upper()
         self.nwkkey.set_nwk_key(nwk_key=k)
         #self.logger.log('found nwk key %s', k)
 
     def _extract_link_key(self, match):
         #self.logger.log('found link key: %s, %s, %s, %s', match.group(1).strip(), match.group(2), match.group(3), match.group(4).replace(' ', ''))
         key_used = False
-        if 'y' in match.group(3):
+        if 'Y' in match.group(3).upper():
             key_used = True
-        self._update_link_key(int(match.group(1).strip()), match.group(2), key_used, match.group(4).replace(' ', ''))
+        self._update_link_key(int(match.group(1).strip()), match.group(2).upper(), key_used, match.group(4).replace(' ', '').upper())
 
     def _extract_entries_used(self, match):
         self.max_num_keys = int(match.group(1))
