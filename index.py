@@ -4,6 +4,7 @@ import web
 import os
 
 from smartmeter import smartmeter
+from smartmeter import logger
 import drlc
 import keys
 import nwk
@@ -35,6 +36,7 @@ class index(object):
 
 
 if __name__ == "__main__":
+    #logger.Logger.use_syslog = True
     smartmeter.smeter = smartmeter.SmartMeter('smartmeter', '/dev/ttyUSB0')
     smartmeter.smeter.start()
     handler.run()
