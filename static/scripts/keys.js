@@ -57,7 +57,6 @@ $(document).ready(function() {
 						"</tr>" );
 					});
 					$( "#max-link-keys" ).text(response.maxlinkkeys);
-					alert(response.hasOwnProperty('tclinkkey'));
 					if (response.hasOwnProperty('tclinkkey')) {
 						$( "#tc-link-key tbody" ).empty();
 						var used = "Yes";
