@@ -40,6 +40,20 @@ $var cssfiles:
 		<label for="nwk-key-seq">Network Key Sequence: </label>
 		<label id="nwk-key-seq"></label>
 	</div>
+	<div id="tc-link-key-info">
+		<h1>Trust Center link key:</h1>
+		<table id="tc-link-key" class="ui-widget ui-widget-content">
+			<thead>
+				<tr class="ui-widget-header ">
+					<th>MAC Address</th>
+					<th>Link Key</th>
+					<th>Connected</th>
+				</tr>
+			</thead>
+			<tbody>
+			</tbody>
+		</table>
+	</div>
 	<div>
 		<h1>Link keys:</h1>
 		<table id="link-keys" class="ui-widget ui-widget-content">
@@ -54,8 +68,17 @@ $var cssfiles:
 			</tbody>
 		</table>
 	</div>
+	<div>
+		<label for="max-link-keys">Maximum number of link keys: </label>
+		<label id="max-link-keys"></label>
+	</div>
 </div>
 
-<button id="add-link-key">Add/Update link key</button>
-<button id="rm-link-key">Remove link key</button>
-<button id="refresh-link-keys">Refresh</button>
+<div>
+	<button id="add-link-key">Add/Update link key</button>
+	<button id="rm-link-key">Remove link key</button>
+</div>
+
+<div>
+	<button id="refresh-link-keys">Refresh</button>
+</div>

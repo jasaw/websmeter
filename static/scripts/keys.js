@@ -56,10 +56,28 @@ $(document).ready(function() {
 						"<td>" + used + "</td>" +
 						"</tr>" );
 					});
+					$( "#max-link-keys" ).text(response.maxlinkkeys);
+					alert(response.hasOwnProperty('tclinkkey'));
+					if (response.hasOwnProperty('tclinkkey')) {
+						$( "#tc-link-key tbody" ).empty();
+						var used = "Yes";
+						if (response.tclinkkey.used == 0) {
+							used = "No";
+						}
+						$( "#tc-link-key tbody" ).append( "<tr>" +
+						"<td>" + response.tclinkkey.mac + "</td>" +
+						"<td>" + response.tclinkkey.key + "</td>" +
+						"<td>" + used + "</td>" +
+						"</tr>" );
+						$( "#tc-link-key-info" ).show();
+					} else {
+						$( "#tc-link-key-info" ).hide();
+					}
 				}
 			},
 			error : function(response) {
-				alert(response.errormsg);
+				//alert(response.errormsg);
+				alert("Unable to contact server. Please try again.");
 			}
 		});
 	}
@@ -96,7 +114,8 @@ $(document).ready(function() {
 							}
 						},
 						error : function(response) {
-							alert(response.errormsg);
+							//alert(response.errormsg);
+							alert("Unable to contact server. Please try again.");
 						}
 					});
 				}
@@ -139,7 +158,8 @@ $(document).ready(function() {
 							}
 						},
 						error : function(response) {
-							alert(response.errormsg);
+							//alert(response.errormsg);
+							alert("Unable to contact server. Please try again.");
 						}
 					});
 				}
@@ -168,5 +188,6 @@ $(document).ready(function() {
 		clearTimeout(requestAllKeysTimer);
 		requestAllKeysTimer = setTimeout(function () { requestAllKeys(); }, 750);
 	});
+	$( "#tc-link-key-info" ).hide();
 	requestAllKeys();
 });

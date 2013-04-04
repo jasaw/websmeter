@@ -93,7 +93,8 @@ $(document).ready(function() {
 				}
 			},
 			error : function(response) {
-				alert(response.errormsg);
+				//alert(response.errormsg);
+				alert("Unable to contact server. Please try again.");
 			}
 		});
 	}
@@ -132,7 +133,8 @@ $(document).ready(function() {
 					}
 				},
 				error : function(response) {
-					alert(response.errormsg);
+					//alert(response.errormsg);
+					alert("Unable to contact server. Please try again.");
 				}
 			});
 		}
@@ -193,7 +195,8 @@ $(document).ready(function() {
 							}
 						},
 						error : function(response) {
-							alert(response.errormsg);
+							//alert(response.errormsg);
+							alert("Unable to contact server. Please try again.");
 						}
 					});
 				}
@@ -238,7 +241,8 @@ $(document).ready(function() {
 							}
 						},
 						error : function(response) {
-							alert(response.errormsg);
+							//alert(response.errormsg);
+							alert("Unable to contact server. Please try again.");
 						}
 					});
 				}
@@ -277,7 +281,8 @@ $(document).ready(function() {
 						}
 					},
 					error : function(response) {
-						alert(response.errormsg);
+						//alert(response.errormsg);
+						alert("Unable to contact server. Please try again.");
 					}
 				});
 			},
