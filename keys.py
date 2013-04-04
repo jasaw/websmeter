@@ -44,6 +44,17 @@ class getkeys(object):
                 else:
                     k['used'] = 0
                 rsp['linkkey'].append(k)
+            tclinkkey = smartmeter.smeter.smctrl.key_mgr.get_tc_link_key()
+            if tclinkkey is not None:
+                k = {}
+                k['mac'] = tclinkkey[0]
+                k['key'] = tclinkkey[1]
+                if tclinkkey[2]:
+                    k['used'] = 1
+                else:
+                    k['used'] = 0
+                rsp['tclinkkey'] = k
+            rsp['maxlinkkeys'] = smartmeter.smeter.smctrl.key_mgr.max_num_keys
             rsp['status'] = 0
             return json.dumps(rsp)
 

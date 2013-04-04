@@ -10,7 +10,6 @@ import logger
 import multiline_rsp
 
 
-INVALID_MAC = "F000000000000000"
 INVALID_LINK_KEY = "F0000000000000000000000000000000"
 
 
@@ -96,6 +95,8 @@ class ZbKeyMgr(object):
     #test-harness key-update now
     #cbke start <nodeid> <dst endpoint>
 
+    # TODO: look for successful KE and refresh cache
+
     def __init__(self, max_num_keys=6):
         self.logger = logger.Logger('zbkeymgr')
         self.max_num_keys = max_num_keys
@@ -106,6 +107,7 @@ class ZbKeyMgr(object):
         self.refresh_cache = False
         self.ready = False
         self.nwkkey = ZbNwkKey()
+        self.tc_link_key = None
         self.link_keys = []
         self.link_keys_to_add = []
         self.lock = threading.Lock()
@@ -126,7 +128,7 @@ class ZbKeyMgr(object):
         all_keys = self.link_keys + self.link_keys_to_add
         all_keys.sort(key=lambda k: k.index)
         for i, k in enumerate(all_keys):
-            if i != k.index:
+            if i != k.index or not self._mac_link_key_is_valid(k.linkkey):
                 return i
         return len(all_keys)
 
@@ -134,12 +136,24 @@ class ZbKeyMgr(object):
         """Return network key in (key, sequence) format"""
         return self.nwkkey.get_nwk_key()
 
+    def get_tc_link_key(self):
+        """Only applies if we are not the trust center. Returns None if not found, otherwise returns (mac, key, used) format"""
+        self.lock.acquire()
+        if self.tc_link_key is not None:
+            key = self.tc_link_key.get_link_key()
+        else:
+            key = None
+        self.lock.release()
+        return key
+
     def get_link_keys(self):
         """Return all link keys in [(mac, key, used)] format"""
         all_keys = []
         self.lock.acquire()
         for k in self.link_keys:
-            all_keys.append(k.get_link_key())
+            entry = k.get_link_key()
+            if self._mac_link_key_is_valid(entry[1]):
+                all_keys.append(entry)
         self.lock.release()
         return all_keys
 
@@ -151,7 +165,7 @@ class ZbKeyMgr(object):
         if self.ready and \
            len(mac) == 16 and all(c in string.hexdigits for c in mac) and \
            len(linkkey) == 32 and all(c in string.hexdigits for c in linkkey) and \
-           self._mac_link_key_are_valid(mac, linkkey):
+           self._mac_link_key_is_valid(linkkey):
             mac = mac.upper()
             linkkey = linkkey.upper()
             self.lock.acquire()
@@ -183,7 +197,7 @@ class ZbKeyMgr(object):
             k = self._find_link_key_in_list(self.link_keys, mac)
             if k is not None:
                 # there is no way to remove a link key, so just overwrite it with rubbish
-                k.set_link_key(mac=INVALID_MAC, linkkey=INVALID_LINK_KEY, used=False)
+                k.set_link_key(linkkey=INVALID_LINK_KEY, used=False)
                 self.link_keys_to_add.append(k)
                 self.link_keys.remove(k)
                 self.lock.release()
@@ -191,7 +205,7 @@ class ZbKeyMgr(object):
             k = self._find_link_key_in_list(self.link_keys_to_add, mac)
             if k is not None:
                 # there is no way to remove a link key, so just overwrite it with rubbish
-                k.set_link_key(mac=INVALID_MAC, linkkey=INVALID_LINK_KEY, used=False)
+                k.set_link_key(linkkey=INVALID_LINK_KEY, used=False)
                 self.lock.release()
                 return True
             self.lock.release()
@@ -200,14 +214,12 @@ class ZbKeyMgr(object):
     # TODO: support switch network key
     #test-harness key-update now
 
-    def _mac_link_key_are_valid(self, mac, linkkey):
-        return mac != INVALID_MAC and linkkey != INVALID_LINK_KEY
+    def _mac_link_key_is_valid(self, linkkey):
+        return linkkey != INVALID_LINK_KEY
 
     def _update_link_key(self, index, mac, used, linkkey):
         if len(mac) == 16 and all(c in string.hexdigits for c in mac) and \
-           len(linkkey) == 32 and all(c in string.hexdigits for c in linkkey) and \
-           self._mac_link_key_are_valid(mac, linkkey):
-            self.lock.acquire()
+           len(linkkey) == 32 and all(c in string.hexdigits for c in linkkey):
             k = self._find_link_key_in_list(self.link_keys, mac)
             if k is not None:
                 k.set_link_key(linkkey=linkkey, index=index, used=used)
@@ -215,7 +227,6 @@ class ZbKeyMgr(object):
                 k = ZbLinkKey(mac, linkkey, index=index, used=used)
                 self.link_keys.append(k)
             self.link_keys.sort(key=lambda k: k.index)
-            self.lock.release()
             #self.logger.log('link key %s updated', mac)
 
     def _extract_nwk_key_seq(self, match):
@@ -230,10 +241,16 @@ class ZbKeyMgr(object):
 
     def _extract_link_key(self, match):
         #self.logger.log('found link key: %s, %s, %s, %s', match.group(1).strip(), match.group(2), match.group(3), match.group(4).replace(' ', ''))
+        mac = match.group(2).upper()
+        linkkey = match.group(4).replace(' ', '').upper()
         key_used = False
         if 'Y' in match.group(3).upper():
             key_used = True
-        self._update_link_key(int(match.group(1).strip()), match.group(2).upper(), key_used, match.group(4).replace(' ', '').upper())
+        index_str = match.group(1).strip()
+        if index_str.isdigit():
+            self._update_link_key(int(index_str), mac, key_used, linkkey)
+        else:
+            self.tc_link_key = ZbLinkKey(mac, linkkey, used=key_used)
 
     def _extract_entries_used(self, match):
         self.max_num_keys = int(match.group(1))
@@ -244,13 +261,16 @@ class ZbKeyMgr(object):
     def _extract_multiline_response(self, start_match, end_match, rsp):
         nwk_key_seq_tag = r'NWK Key seq num: (0x[a-fA-F0-9]*)'
         nwk_key_tag = r'NWK Key: ([a-fA-F0-9 ]*)'
-        link_key_tag = r'([0-9 ]*)\(>\)([a-fA-F0-9]{16}).*([y|n])([a-fA-F0-9 ]*)'
+        link_key_tag = r'([0-9 \-]*)\(>\)([a-fA-F0-9]{16}).*([y|n])([a-fA-F0-9 ]*)'
         tags = [(nwk_key_seq_tag, self._extract_nwk_key_seq),
                 (nwk_key_tag,     self._extract_nwk_key),
                 (link_key_tag,    self._extract_link_key),]
         tag_index = 0
         t, f = tags[tag_index]
+        self.lock.acquire()
         self._extract_entries_used(end_match)
+        self.tc_link_key = None
+        self.link_keys = []
         for line in rsp:
             #self.logger.log('%s', line)
             match = re.search(t, line)
@@ -260,6 +280,12 @@ class ZbKeyMgr(object):
                 if tag_index + 1 < len(tags):
                     tag_index = tag_index + 1
                     t, f = tags[tag_index]
+        for k_add in self.link_keys_to_add:
+            k_add_mac, k_add_link_key, k_add_used = k.get_link_key()
+            k = self._find_link_key_in_list(self.link_keys, k_add_mac)
+            if k is not None:
+                self.link_keys.remove(k)
+        self.lock.release()
 
     def handle_rsp(self, rsp_line):
         return self.mrsp.process_one_response_line(rsp_line)
@@ -272,7 +298,7 @@ class ZbKeyMgr(object):
                 for k in self.link_keys_to_add:
                     index, mac, linkkey, used = k.get_indexed_link_key()
                     cmds.append('option link %d {%s} {%s}\n' % (index, re.sub(r'(..)', r'\1 ', mac), re.sub(r'(..)', r'\1 ', linkkey)))
-                    if self._mac_link_key_are_valid(mac, linkkey):
+                    if self._mac_link_key_is_valid(linkkey):
                         self.link_keys.append(k)
                 self.link_keys.sort(key=lambda k: k.index)
                 self.link_keys_to_add = []
