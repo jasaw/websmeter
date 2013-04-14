@@ -1,13 +1,166 @@
 $def with ()
-$var jsfiles: drlc.js
+$var jsfiles: jquery-ui-timepicker.js drlc.js
 $var cssfiles:
 
-<form class="form" method="post">
+<div id="add-drlc-event-form" title="Add DRLC Event">
+	<p id="add-drlc-event-form-tips"></p>
+	<form>
+		<fieldset>
+			<div>
+				<label>Device Class</label><br>
+				<table>
+					<tr>
+						<td><input type="checkbox" name="adddevcls_compressor" id="adddevcls_compressor">HVAC compressor or furnace</td>
+						<td><input type="checkbox" name="adddevcls_waterheater" id="adddevcls_waterheater">Water heater</td>
+					</tr>
+					<tr>
+						<td><input type="checkbox" name="adddevcls_stripheater" id="adddevcls_stripheater">Strip or baseboard heaters</td>
+						<td><input type="checkbox" name="adddevcls_poolpump" id="adddevcls_poolpump">Pool pump or spa</td>
+					</tr>
+					<tr>
+						<td><input type="checkbox" name="adddevcls_ciload" id="adddevcls_ciload">Managed commercial & industrial loads</td>
+						<td><input type="checkbox" name="adddevcls_irrpump" id="adddevcls_irrpump">Irrigation pump</td>
+					</tr>
+					<tr>
+						<td><input type="checkbox" name="adddevcls_miscload" id="adddevcls_miscload">Simple misc or residential loads</td>
+						<td><input type="checkbox" name="adddevcls_smartapp" id="adddevcls_smartapp">Smart appliances</td>
+					</tr>
+					<tr>
+						<td><input type="checkbox" name="adddevcls_ev" id="adddevcls_ev">Electric vehicle</td>
+						<td><input type="checkbox" name="adddevcls_extlight" id="adddevcls_extlight">Exterior lighting</td>
+					</tr>
+					<tr>
+						<td><input type="checkbox" name="adddevcls_gensys" id="adddevcls_gensys">Generation systems</td>
+						<td><input type="checkbox" name="adddevcls_intlight" id="adddevcls_intlight">Interior lighting</td>
+					</tr>
+				</table>
+			</div>
+			<div>
+				<label for="addueg">Utility Enrolment Group</label>
+				<input type="text" name="addueg" id="addueg" value="" class="text ui-widget-content ui-corner-all" title="Bit field value between 0 and 0xFF. Leave empty if not used." />
+			</div>
+			<div>
+				<label for="addstarttime">Start Date</label>
+				<input type="text" name="addstartdate" id="addstartdate" value="" class="text ui-widget-content ui-corner-all" />
+				<label for="addstarttime">Time</label>
+				<input type="text" name="addstarttime" id="addstarttime" value="" class="text ui-widget-content ui-corner-all" />
+			</div>
+			<div>
+				<label for="addduration">Duration</label>
+				<input type="text" name="addduration" id="addduration" value="" class="text ui-widget-content ui-corner-all" title="In minutes between 1 and 1440." />
+			</div>
+			<div>
+				<label>Criticality</label><br>
+				<table>
+					<tr>
+						<td><input type="radio" name="addcrit" id="addcrit_green">Green</td>
+						<td><input type="radio" name="addcrit" id="addcrit_level5">Level 5</td>
+					</tr>
+					<tr>
+						<td><input type="radio" name="addcrit" id="addcrit_level1">Level 1</td>
+						<td><input type="radio" name="addcrit" id="addcrit_emergency">Emergency</td>
+					</tr>
+					<tr>
+						<td><input type="radio" name="addcrit" id="addcrit_level2">Level 2</td>
+						<td><input type="radio" name="addcrit" id="addcrit_outage">Planned outage</td>
+					</tr>
+					<tr>
+						<td><input type="radio" name="addcrit" id="addcrit_level3">Level 3</td>
+						<td><input type="radio" name="addcrit" id="addcrit_disconnect">Service disconnect</td>
+					</tr>
+					<tr>
+						<td><input type="radio" name="addcrit" id="addcrit_level4">Level 4</td>
+						<td><input type="radio" name="addcrit" id="addcrit_utility">Utility defined
+						<input type="text" name="addcrit_utility_level" id="addcrit_utility_level" value="" class="text ui-widget-content ui-corner-all" title="Between 1 and 6." /></td>
+					</tr>
+				</table>
+			</div>
+			<div>
+				<label>Event Control</label><br>
+				<table>
+					<tr>
+						<td><input type="checkbox" name="addectrl_randstart" id="addectrl_randstart">Randomise start time</td>
+						<td><input type="checkbox" name="addectrl_randend" id="addectrl_randend">Randomise end time</td>
+					</tr>
+				</table>
+			</div>
+			<div>
+				<label for="addavgload">Average Load</label>
+				<input type="text" name="addavgload" id="addavgload" value="" class="text ui-widget-content ui-corner-all" title="Between -100 and 100. Leave empty if not used." />
+			</div>
+			<div>
+				<label for="adddutycycle">Duty Cycle</label>
+				<input type="text" name="adddutycycle" id="adddutycycle" value="" class="text ui-widget-content ui-corner-all" title="Between 0 and 100. Leave empty if not used." />
+			</div>
+			<div>
+				<label for="addctsp">Cooling Temperature Set Point</label>
+				<input type="text" name="addctsp" id="addctsp" value="" class="text ui-widget-content ui-corner-all" title="Between -273.15 and 327.66 degrees Celsius. Leave empty if not used." />
+			</div>
+			<div>
+				<label for="addhtsp">Heating Temperature Set Point</label>
+				<input type="text" name="addhtsp" id="addhtsp" value="" class="text ui-widget-content ui-corner-all" title="Between -273.15 and 327.66 degrees Celsius. Leave empty if not used." />
+			</div>
+			<div>
+				<label for="addctos">Cooling Temperature Offset</label>
+				<input type="text" name="addctos" id="addctos" value="" class="text ui-widget-content ui-corner-all" title="Between 0 and 25.4 degrees Celsius. Leave empty if not used." />
+			</div>
+			<div>
+				<label for="addhtos">Heating Temperature Offset</label>
+				<input type="text" name="addhtos" id="addhtos" value="" class="text ui-widget-content ui-corner-all" title="Between 0 and 25.4 degrees Celsius. Leave empty if not used." />
+			</div>
+		</fieldset>
+	</form>
+</div>
+
+<div id="rm-drlc-event-form" title="Remove DRLC Event">
+	<p id="rm-drlc-event-form-tips"></p>
+	<form>
+		<fieldset>
+			<div>
+				<label for="rmeventid">Event ID</label>
+				<input type="text" name="rmeventid" id="rmeventid" value="" class="text ui-widget-content ui-corner-all" />
+			</div>
+		</fieldset>
+	</form>
+</div>
+
+<div id="current-drlc-events" class="ui-widget">
 	<div>
-		<label>Average load</label>
-		<input type="text" name="avgload" id="avgload" class="textinput"/>
+		<h1>DRLC Events:</h1>
+		<table id="drlc-events" class="ui-widget ui-widget-content">
+			<thead>
+				<tr class="ui-widget-header ">
+					<th>ID</th>
+					<th>Device Class</th>
+					<th>Utility Enrolment Group</th>
+					<th>Start Time</th>
+					<th>Duration</th>
+					<th>Criticality</th>
+					<th>Event Control</th>
+					<th>Average Load</th>
+					<th>Duty Cycle</th>
+					<th>Cooling Temp Set</th>
+					<th>Heating Temp Set</th>
+					<th>Cooling Temp Offset</th>
+					<th>Heating Temp Offset</th>
+				</tr>
+			</thead>
+			<tbody>
+			</tbody>
+		</table>
 	</div>
 	<div>
-		<input type="button" value="Create Event" id="mkevent" class="button"/>
+		<label for="max-num-drlc-events">Maximum number of events: </label>
+		<label id="max-num-drlc-events"></label>
 	</div>
-</form>
+</div>
+
+<div>
+	<button id="add-drlc-event">Add event</button>
+	<button id="rm-drlc-event">Remove event</button>
+	<button id="rm-all-drlc-events">Remove all events</button>
+</div>
+
+<div>
+	<button id="refresh-drlc-events">Refresh</button>
+</div>

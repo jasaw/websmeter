@@ -7,7 +7,7 @@ from smartmeter import logger
 
 
 urls = (
-    "/mkdrlc", "mkdrlc",
+    "/event", "event",
     "", "drlc"
 )
 
@@ -22,18 +22,37 @@ class drlc(object):
 
 
 
-class mkdrlc(object):
+
+class event(object):
     def POST(self):
         web.header('Content-Type', 'application/json')
         try:
-            avgload = getJsonArg("avgload", "255")
-            if not avgload.isdigit():
-                return json.dumps({"status": -1, "errormsg": "Average load must be a number"})
-            if not (0 <= int(avgload) <= 100) and int(avgload) != 255:
-                return json.dumps({"status": -1, "errormsg": "Average load must be between 0 to 100"})
+            status = False
+            action = common.getJsonArg("action", "")
+            if action == 'add':
+                #device_class=[], ueg=['ALL'],
+                #start_time=0, duration=0, criticality='GREEN',
+                #cto=TEMPERATURE_OFFSET_NOT_USED, hto=TEMPERATURE_OFFSET_NOT_USED,
+                #ctsp=TEMPERATURE_SET_POINT_NOT_USED, htsp=TEMPERATURE_SET_POINT_NOT_USED,
+                #avgload=AVERAGE_LOAD_NOT_USED, dutycycle=DUTY_CYCLE_NOT_USED,
+                #ectrl=[]
+                
+
+            elif action == 'rm':
+                event_id = common.getJsonArg("eid", None)
+                if event_id is not None and not isinstance(event_id, (int,long)):
+                    return json.dumps({"status": -1, "errormsg": "Malformed event ID input"})
+
+            elif action == 'clear':
+                status = smartmeter.smeter.smctrl.drlc_mgr.rm_all_events()
+
+            else:
+                return json.dumps({"status": -1, "errormsg": "Unsupported action"})
+
+            if not status:
+                return json.dumps({"status": -1, "errormsg": "Action failed"})
             return json.dumps({"status": 0})
 
         except Exception, ex:
             logger.print_trace(ex)
             return json.dumps({"status": -1, "errormsg": "Server error"})
-
