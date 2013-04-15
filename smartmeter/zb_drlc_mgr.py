@@ -60,6 +60,7 @@ DUTY_CYCLE_NOT_USED = 0xFF
 
 # bit map
 EVENT_CONTROL = {
+    'NONE'       : 0x00,
     'RAND_START' : 0x01,
     'RAND_END'   : 0x02,
     'ALL'        : 0x03
@@ -89,16 +90,16 @@ def get_next_issuer_event_id():
 class ZbDrlcEvent(object):
 
     def __init__(self, index=-1,
-                 eid=0, dev=[], ueg=['ALL'],
-                 start_time=0, duration=0, criticality='GREEN',
+                 eid=0, dev=DEVICE_CLASS['ALL'], ueg=UTILITY_ENROLMENT_GROUP['ALL'],
+                 start_time=0, duration=0, criticality=CRITICALITY_LEVEL['GREEN'],
                  cto=TEMPERATURE_OFFSET_NOT_USED, hto=TEMPERATURE_OFFSET_NOT_USED,
                  ctsp=TEMPERATURE_SET_POINT_NOT_USED, htsp=TEMPERATURE_SET_POINT_NOT_USED,
                  avgload=AVERAGE_LOAD_NOT_USED, dutycycle=DUTY_CYCLE_NOT_USED,
-                 ectrl=[]):
+                 ectrl=EVENT_CONTROL['NONE']):
         """Create a DRLC event
         - index is the DRLC table entry index
         - eid is event id (unsigned 32bits)
-        - dev is device class (example: ['ELECTRIC_VEHICLE', 'POOL_PUMP'])
+        - dev is device class (example: DEVICE_CLASS['ELECTRIC_VEHICLE'] | DEVICE_CLASS['POOL_PUMP'])
         - ueg is utility enrolment group
         - start_time in zigbee utc (unsigned 32bits)
         - duration in minutes, max 1440 or one day (unsigned 16bits)
@@ -123,12 +124,16 @@ class ZbDrlcEvent(object):
     def _check_event_values(self):
         if self.device_class > DEVICE_CLASS['ALL'] or self.device_class < 0:
             raise BadArgumentError('Invalid device class value: ' + str(self.device_class))
+        if self.utility_group > 0xFF or self.utility_group < 0:
+            raise BadArgumentError('Invalid utility enrolment group value: ' + str(self.utility_group))
         if self.criticality_value > CRITICALITY_LEVEL['UTILITY6'] or self.criticality_value < CRITICALITY_LEVEL['GREEN']:
             raise BadArgumentError('Invalid criticality value: ' + str(self.criticality_value))
         if self.event_control > EVENT_CONTROL['ALL'] or self.event_control < 0:
             raise BadArgumentError('Invalid event control value: ' + str(self.event_control))
         if self.start_time > 0xFFFFFFFF or self.start_time < 0:
             raise BadArgumentError('Invalid start time: ' + str(self.start_time))
+        if self.event_control > EVENT_CONTROL['ALL'] or self.event_control < EVENT_CONTROL['NONE']:
+            raise BadArgumentError('Invalid event control value: ' + str(self.event_control))
         if self.duration > 1440 or self.duration < 0:
             raise BadArgumentError('Invalid duration: ' + str(self.duration))
         if self.cool_temp_offset > 0xFF or self.cool_temp_offset < 0:
@@ -146,28 +151,6 @@ class ZbDrlcEvent(object):
             if self.duty_cycle > 100 or self.duty_cycle < 0:
                 raise BadArgumentError('Invalid duty cycle: ' + str(self.duty_cycle))
 
-    def _set_device_class(self, dev=[]):
-        self.device_class = 0
-        for d in dev:
-            if DEVICE_CLASS.has_key(d):
-                self.device_class = self.device_class | DEVICE_CLASS[d]
-            else:
-                raise BadArgumentError('Invalid device class: ' + str(d))
-
-    def _set_utility_enrolment_group(self, ueg=[]):
-        self.utility_group = 0
-        for g in ueg:
-            if UTILITY_ENROLMENT_GROUP.has_key(g):
-                self.utility_group = self.utility_group | UTILITY_ENROLMENT_GROUP[g]
-            else:
-                raise BadArgumentError('Invalid utility enrolment group: ' + str(g))
-
-    def _set_criticality(self, criticality='GREEN'):
-        if CRITICALITY_LEVEL.has_key(criticality):
-            self.criticality_value = CRITICALITY_LEVEL[criticality]
-        else:
-            raise BadArgumentError('Invalid criticality: ' + str(d))
-
     def _set_event_control(self, ectrl=[]):
         self.event_control = 0
         for e in ectrl:
@@ -176,21 +159,31 @@ class ZbDrlcEvent(object):
             else:
                 raise BadArgumentError('Invalid event control: ' + str(e))
 
-
     def get_event(self):
-        """Return network info in dictionary format"""
-        # TODO: get event
-        nwkinfo = {}
-        #self.lock.acquire()
-        #nwkinfo['mac'] = self.mac
-        #nwkinfo['node_id'] = self.node_id
-        #nwkinfo['end_point'] = self.end_point
-        #nwkinfo['pan_id'] = self.pan_id
-        #nwkinfo['expan_id'] = self.expan_id
-        #nwkinfo['radio_channel'] = self.radio_channel
-        #nwkinfo['radio_power'] = self.radio_power
-        #self.lock.release()
-        return nwkinfo
+        """Return DRLC event in dictionary format"""
+        e = {}
+        self.lock.acquire()
+        e['eid'] = self.event_id
+        e['dev'] = self.device_class
+        e['ueg'] = self.utility_group
+        e['start'] = self.start_time
+        e['duration'] = self.duration
+        e['criticality'] = self.criticality_value
+        e['ectrl'] = self.event_control
+        if self.cool_temp_offset != TEMPERATURE_OFFSET_NOT_USED:
+            e['cto'] = self.cool_temp_offset
+        if self.heat_temp_offset != TEMPERATURE_OFFSET_NOT_USED:
+            e['hto'] = self.heat_temp_offset
+        if self.cool_temp_set != TEMPERATURE_SET_POINT_NOT_USED:
+            e['ctsp'] = self.cool_temp_set
+        if self.heat_temp_set != TEMPERATURE_SET_POINT_NOT_USED:
+            e['htsp'] = self.heat_temp_set
+        if self.average_load != AVERAGE_LOAD_NOT_USED:
+            e['avgload'] = self.average_load
+        if self.duty_cycle != DUTY_CYCLE_NOT_USED:
+            e['dutycycle'] = self.duty_cycle
+        self.lock.release()
+        return e
 
     def set_event(self, index=None, eid=None, dev=None, ueg=None,
                   start_time=None, duration=None, criticality=None,
@@ -203,15 +196,15 @@ class ZbDrlcEvent(object):
         if eid is not None:
             self.event_id = eid
         if dev is not None:
-            self._set_device_class(dev)
+            self.device_class = dev
         if ueg is not None:
-            self._set_utility_enrolment_group(ueg)
+            self.utility_group = ueg
         if start_time is not None:
             self.start_time = start_time
         if duration is not None:
             self.duration = duration
         if criticality is not None:
-            self._set_criticality(criticality)
+            self.criticality_value = criticality
         if cto is not None:
             self.cool_temp_offset = cto
         if hto is not None:
@@ -225,7 +218,7 @@ class ZbDrlcEvent(object):
         if dutycycle is not None:
             self.duty_cycle = dutycycle
         if ectrl is not None:
-            self._set_event_control(ectrl)
+            self.event_control = ectrl
         self._check_event_values()
         self.lock.release()
 
@@ -369,7 +362,7 @@ class ZbDrlcMgr(object):
         event.event_control = int(match.group(1),16)
 
     def _extract_max_num_events(self, start_match, end_match, rsp):
-        self.max_num_events = int(match.group(1))
+        self.max_num_events = int(start_match.group(1))
         self.ready = True
 
     def _extract_event_info(self, start_match, end_match, rsp):
@@ -421,7 +414,7 @@ class ZbDrlcMgr(object):
                 (avgload_tag,       self._extract_matched_average_load),
                 (dutycycle_tag,     self._extract_matched_duty_cycle),
                 (ectrl_tag,         self._extract_matched_event_control),]
-        event_index = int(match.group(1))
+        event_index = int(start_match.group(1))
         self.lock.acquire()
 
         the_event = self._find_event_by_index(self.drlc_events, event_index)
@@ -449,12 +442,20 @@ class ZbDrlcMgr(object):
             self.drlc_events.remove(the_event)
         self.lock.release()
 
-    def add_event(self, device_class=[], ueg=['ALL'],
-                  start_time=0, duration=0, criticality='GREEN',
+    def get_all_events(self):
+        """Return DRLC events in [dictionary] format"""
+        all_events = []
+        for e in self.drlc_events:
+            if e.source != EVENT_NOT_SET:
+                all_events.append(e.get_event())
+        return all_events
+
+    def add_event(self, device_class=DEVICE_CLASS['ALL'], ueg=UTILITY_ENROLMENT_GROUP['ALL'],
+                  start_time=0, duration=0, criticality=CRITICALITY_LEVEL['GREEN'],
                   cto=TEMPERATURE_OFFSET_NOT_USED, hto=TEMPERATURE_OFFSET_NOT_USED,
                   ctsp=TEMPERATURE_SET_POINT_NOT_USED, htsp=TEMPERATURE_SET_POINT_NOT_USED,
                   avgload=AVERAGE_LOAD_NOT_USED, dutycycle=DUTY_CYCLE_NOT_USED,
-                  ectrl=[]):
+                  ectrl=EVENT_CONTROL['NONE']):
         status = False
         if self.ready:
             self.lock.acquire()

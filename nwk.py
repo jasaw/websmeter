@@ -48,11 +48,11 @@ class action(object):
                 panid = common.getJsonArg("panid", None)
                 #d = logger.Logger("nwk.py")
                 #d.log("%s, %s, %s", str(type(channel)), str(type(power)), str(type(panid)))
-                if channel is not None and not isinstance(channel, (int,long)):
+                if channel is not None and not isinstance(channel, (int)):
                     return json.dumps({"status": -1, "errormsg": "Malformed channel input"})
-                if power is not None and not isinstance(power, (int,long)):
+                if power is not None and not isinstance(power, (int)):
                     return json.dumps({"status": -1, "errormsg": "Malformed power input"})
-                if panid is not None and not isinstance(panid, (int,long)):
+                if panid is not None and not isinstance(panid, (int)):
                     return json.dumps({"status": -1, "errormsg": "Malformed PAN ID input"})
                 if action == 'form':
                     status = smartmeter.smeter.smctrl.nwk_mgr.form_network(radio_channel=channel, radio_power=power, pan_id=panid)
@@ -62,9 +62,9 @@ class action(object):
             elif action == 'pjoin':
                 duration = common.getJsonArg("duration", None)
                 bcast = common.getJsonArg("broadcast", None)
-                if duration is not None and not isinstance(duration, (int,long)):
+                if not isinstance(duration, (int)):
                     return json.dumps({"status": -1, "errormsg": "Malformed duration input"})
-                if bcast is not None and not isinstance(bcast, (int,long)):
+                if not isinstance(bcast, (int)):
                     return json.dumps({"status": -1, "errormsg": "Malformed broadcast input"})
                 if bcast > 0:
                     broadcast = True

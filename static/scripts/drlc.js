@@ -12,7 +12,7 @@ $(document).ready(function() {
 	addhtos = $( "#addhtos" ),
 	allFields = $( [] ).add( addueg ).add( addstartdate ).add( addstarttime ).add( addduration ).add( addcrit_utility_level ).add( addavgload ).add( adddutycycle ).add( addctsp ).add( addhtsp ).add( addctos ).add( addhtos ),
 	tips = $( ".validateTips" );
-	$( "#addstartdate" ).datepicker({ minDate: new Date(2000, 1 - 1, 1), maxDate: new Date(2030, 1 - 1, 1) });
+	$( "#addstartdate" ).datepicker({ minDate: new Date(2000, 1 - 1, 1), maxDate: new Date(2030, 1 - 1, 1), dateFormat: "dd/mm/yy" }).val();
 	$( "#addstarttime" ).timepicker();
 	add_drlc_event_form_tips = $( "#add-drlc-event-form-tips" );
 	rm_drlc_event_form_tips = $( "#rm-drlc-event-form-tips" );
@@ -45,6 +45,23 @@ $(document).ready(function() {
 			return true;
 		}
 	}
+	function checkDateRange( tip, o, n, min, max ) {
+		if (isNaN(parseInt(o.val()))) {
+			o.addClass( "ui-state-error" );
+			updateTips( tip, "Input " + n + " is invalid." );
+			return false;
+		} else if (parseInt(o.val()) < min) {
+			o.addClass( "ui-state-error" );
+			updateTips( tip, "Input " + n + " must be later than " + new Date(min).toLocaleString() + "." );
+			return false;
+		} else if (parseInt(o.val()) > max) {
+			o.addClass( "ui-state-error" );
+			updateTips( tip, "Input " + n + " must be earlier than " + new Date(max).toLocaleString() + "." );
+			return false;
+		} else {
+			return true;
+		}
+	}
 	function checkRegexp( tip, o, regexp, n ) {
 		if ( !( regexp.test( o.val() ) ) ) {
 			o.addClass( "ui-state-error" );
@@ -54,50 +71,145 @@ $(document).ready(function() {
 			return true;
 		}
 	}
+	function drlcDeviceClassToString(value) {
+		var deviceClassStringMap = {
+			0x0001 : "HVAC compressor or furnace",
+			0x0002 : "Strip or baseboard heaters",
+			0x0004 : "Water heater",
+			0x0008 : "Pool pump or spa",
+			0x0010 : "Smart appliances",
+			0x0020 : "Irrigation pump",
+			0x0040 : "Managed commercial & industrial loads",
+			0x0080 : "Simple misc or residential loads",
+			0x0100 : "Exterior lighting",
+			0x0200 : "Interior lighting",
+			0x0400 : "Electric vehicle",
+			0x0800 : "Generation systems",
+		};
+		var device_class_string = "";
+		for (var i=0; i < 12; i++) {
+			if ((value & (1 << i)) && (deviceClassStringMap[value & (1 << i)])) {
+				if (device_class_string.length > 0)
+					device_class_string = device_class_string + "<br>";
+				device_class_string = device_class_string + deviceClassStringMap[value & (1 << i)];
+			}
+		}
+		return device_class_string;
+	}
+	function drlcUegToString(value) {
+		var ueg_string = "";
+		if (value == 0) {
+			ueg_string = "All";
+		} else {
+			var intvalue = parseInt(value);
+			if (!isNaN(intvalue))
+				ueg_string = "0x" + intvalue.toString(16);
+		}
+		return ueg_string;
+	}
+	function drlcStartTimeToString(value) {
+		var time_string = "";
+		var intvalue = parseInt(value);
+		if (!isNaN(intvalue)) {
+			var zigbee_time_offset = Date.UTC(2000,1-1,1);
+			var zigbee_time = intvalue;
+			var pc_time = new Date(zigbee_time * 1000 + zigbee_time_offset);
+			alert(pc_time.toUTCString());
+			alert(pc_time.toLocaleString());
+			time_string = pc_time.toLocaleString();
+		}
+		return time_string;
+	}
+	function drlcCriticalityToString(value) {
+		var criticalityStringMap = {
+			0x01 : "Green",
+			0x02 : "Level 1",
+			0x03 : "Level 2",
+			0x04 : "Level 3",
+			0x05 : "Level 4",
+			0x06 : "Level 5",
+			0x07 : "Emergency",
+			0x08 : "Planned Outage",
+			0x09 : "Service Disconnect",
+			0x0A : "Utility Defined 1",
+			0x0B : "Utility Defined 2",
+			0x0C : "Utility Defined 3",
+			0x0D : "Utility Defined 4",
+			0x0E : "Utility Defined 5",
+			0x0F : "Utility Defined 6",
+		};
+		var criticality_string = "";
+		if (criticalityStringMap[value])
+			criticality_string = criticalityStringMap[value];
+		return criticality_string;
+	}
+	function drlcEventControlToString(value) {
+		var eventControlStringMap = {
+			0x00 : "No randomisation",
+			0x01 : "Randomise start time",
+			0x02 : "Randomise end time",
+			0x03 : "Randomise start & end time",
+		};
+		var event_control_string = "";
+		if (eventControlStringMap[value])
+			event_control_string = eventControlStringMap[value];
+		return event_control_string;
+	}
+	function drlcAverageLoadToString(value) {
+		var averageload_string = "";
+		var intvalue = parseInt(value);
+		if (!isNaN(intvalue))
+			averageload_string = intvalue.toString(10) + "%";
+		return averageload_string;
+	}
 	function requestDrlcEvents() {
-		alert("Get DRLC events not implemented yet");
-		/*
 		$.ajax({
 			type : "GET",
 			url : "/drlc/event",
 			contentType : "application/json; charset=utf-8",
 			dataType : "json",
 			success : function(response) {
+				$( "#drlc-events tbody" ).empty();
 				//$.each(response, function(key, value) {
 				//	alert(key + " : " + value);
 				//});
 				if (response.status == 0) {
-					// Clear old text
-					$( "#mynwkstatus" ).text("");
-					$( "#mymacaddr" ).text("");
-					$( "#mynodeid" ).text("");
-					$( "#myendpoint" ).text("");
-					$( "#mypanid" ).text("");
-					$( "#myexpanid" ).text("");
-					$( "#myradiochannel" ).text("");
-					$( "#myradiopower" ).text("");
-					// Set new text
-					var nwk_is_up_str = "DOWN";
-					if (response.nwk_is_up)
-						nwk_is_up_str = "OK";
-					var nodeidint = parseInt(response.node_id);
-					var nodeidhexstring = "";
-					if (!isNaN(nodeidint))
-						nodeidhexstring = " (0x" + nodeidint.toString(16) + ")";
-					var panidint = parseInt(response.pan_id);
-					var panidhexstring = "";
-					if (!isNaN(panidint))
-						panidhexstring = " (0x" + panidint.toString(16) + ")";
-					$( "#mynwkstatus" ).text(nwk_is_up_str);
-					$( "#mymacaddr" ).text(response.mac);
-					$( "#mynodeid" ).text(response.node_id + nodeidhexstring);
-					$( "#myendpoint" ).text(response.end_point);
-					$( "#mypanid" ).text(response.pan_id + panidhexstring);
-					$( "#myexpanid" ).text(response.expan_id);
-					$( "#myradiochannel" ).text(response.radio_channel);
-					$( "#myradiopower" ).text(response.radio_power);
-					// TODO: get network status, and prevent forming or joining network if network is already up
-					// similarly for permit join
+					$.each(response.events, function(key, value) {
+						var avgload_str = "";
+						if (value.hasOwnProperty("avgload"))
+							avgload_str = drlcAverageLoadToString(value.avgload);
+						var dutycycle_str = "";
+						if (value.hasOwnProperty("dutycycle"))
+							dutycycle_str = value.dutycycle.toString(10);
+						var ctsp_str = "";
+						if (value.hasOwnProperty("ctsp"))
+							ctsp_str = (value.ctsp/100).toString(10) + " \u2103";
+						var htsp_str = "";
+						if (value.hasOwnProperty("htsp"))
+							htsp_str = (value.htsp/100).toString(10) + " \u2103";
+						var cto_str = "";
+						if (value.hasOwnProperty("cto"))
+							cto_str = (value.cto/10).toString(10) + " \u2103";
+						var hto_str = "";
+						if (value.hasOwnProperty("hto"))
+							hto_str = (value.hto/10).toString(10) + " \u2103";
+						$( "#drlc-events tbody" ).append( "<tr>" +
+						"<td>" + "0x" + value.eid.toString(16) + "</td>" +
+						"<td>" + drlcDeviceClassToString(value.dev) + "</td>" +
+						"<td>" + drlcUegToString(value.ueg) + "</td>" +
+						"<td>" + drlcStartTimeToString(value.start) + "</td>" +
+						"<td>" + value.duration.toString(10) + "</td>" +
+						"<td>" + drlcCriticalityToString(value.criticality) + "</td>" +
+						"<td>" + drlcEventControlToString(value.ectrl) + "</td>" +
+						"<td>" + avgload_str + "</td>" +
+						"<td>" + dutycycle_str + "</td>" +
+						"<td>" + ctsp_str + "</td>" +
+						"<td>" + htsp_str + "</td>" +
+						"<td>" + cto_str + "</td>" +
+						"<td>" + hto_str + "</td>" +
+						"</tr>" );
+					});
+					$( "#max-link-keys" ).text(response.maxlinkkeys);
 				}
 			},
 			error : function(response) {
@@ -105,7 +217,6 @@ $(document).ready(function() {
 				alert("Unable to contact server. Please try again.");
 			}
 		});
-		*/
 	}
 	$( "#add-drlc-event-form" ).dialog({
 		autoOpen: false,
@@ -114,17 +225,23 @@ $(document).ready(function() {
 		modal: true,
 		buttons: {
 			"Add DRLC Event": function() {
-				alert("Add DRLC event not implemented yet");
-				/*
 				var bValid = true;
 				allFields.removeClass( "ui-state-error" );
-				bValid = bValid && checkRegexp( nwk_form_join_form_tips, radiochannel, /^(0x)*([0-9a-fA-F])*$/, "Radio channel must be a number." );
-				if ( radiochannel.val().length != 0 )
-					bValid = bValid && checkRange( nwk_form_join_form_tips, radiochannel, "radio channel", 11, 26 );
-				bValid = bValid && checkRegexp( nwk_form_join_form_tips, radiopower, /^(0x)*([0-9a-fA-F])*$/, "Radio power must be a number." );
+				bValid = bValid && checkRegexp( add_drlc_event_form_tips, addueg, /^(0x)*([0-9a-fA-F])*$/, "Utility enrolment group must be a number." );
+				if ( addueg.val().length != 0 )
+					bValid = bValid && checkRange( add_drlc_event_form_tips, addueg, "utility enrolment group", 0x00, 0xFF );
+				bValid = bValid && checkRegexp( add_drlc_event_form_tips, addstartdate, /^\d{1,2}\/\d{1,2}\/\d{4}$/, "Start date format must be dd/mm/yyyy." );
+				bValid = bValid && checkRegexp( add_drlc_event_form_tips, addstarttime, /^\d{1,2}:\d{2}$/, "Start time format must be hh:mm." );
+				// TODO: check date range
+				bValid = bValid && checkDateRange( add_drlc_event_form_tips, addstartdate      +     addstarttime, "start date", Date.UTC(2000,1-1,1), Date.UTC(2030,1-1,1) );
+
+
+
 				if ( radiopower.val().length != 0 )
-					bValid = bValid && checkRange( nwk_form_join_form_tips, radiopower, "radio power", 0, 3 );
-				bValid = bValid && checkRegexp( nwk_form_join_form_tips, panid, /^(0x)*([0-9a-fA-F])*$/, "PAN ID must be a number." );
+					bValid = bValid && checkRange( add_drlc_event_form_tips, radiopower, "radio power", 0, 3 );
+				bValid = bValid && checkRegexp( add_drlc_event_form_tips, panid, /^(0x)*([0-9a-fA-F])*$/, "PAN ID must be a number." );
+				alert("Add DRLC event not implemented yet");
+				/*
 				if ( bValid ) {
 					var jsonData = {};
 					jsonData["action"] = action;
@@ -172,6 +289,7 @@ $(document).ready(function() {
 		modal: true,
 		buttons: {
 			"Remove DRLC event": function() {
+				// TODO: remove DRLC event
 				alert("Remove DRLC event not implemented yet");
 			},
 			Cancel: function() {
@@ -195,6 +313,7 @@ $(document).ready(function() {
 	$( "#rm-all-drlc-events" )
 	.button()
 	.click(function() {
+		// TODO: remove all DRLC events
 		alert("Not implemented yet.");
 	});
 	$( "#refresh-drlc-events" )

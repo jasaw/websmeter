@@ -37,7 +37,8 @@ class index(object):
 
 if __name__ == "__main__":
     #logger.Logger.use_syslog = True
-    smartmeter.smeter = smartmeter.SmartMeter('smartmeter', '/dev/ttyUSB0')
+    smartmeter.smeter = smartmeter.SmartMeter('./smartmeter/smartmeter', '/dev/ttyUSB0')
+    #smartmeter.smeter = smartmeter.SmartMeter('smartmeter', '/dev/ttyUSB0')
     smartmeter.smeter.start()
     handler.run()
     smartmeter.smeter.stop()
