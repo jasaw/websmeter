@@ -101,13 +101,13 @@ $(document).ready(function() {
 	function sendFormJoinNetwork(action, o) {
 		var bValid = true;
 		allFields.removeClass( "ui-state-error" );
-		bValid = bValid && checkRegexp( nwk_form_join_form_tips, radiochannel, /^(0x)*([0-9a-fA-F])*$/, "Radio channel must be a number." );
+		bValid = bValid && checkRegexp( nwk_form_join_form_tips, radiochannel, /^(0x){0,1}([0-9a-fA-F])*$/, "Radio channel must be a number." );
 		if ( radiochannel.val().length != 0 )
 			bValid = bValid && checkRange( nwk_form_join_form_tips, radiochannel, "radio channel", 11, 26 );
-		bValid = bValid && checkRegexp( nwk_form_join_form_tips, radiopower, /^(0x)*([0-9a-fA-F])*$/, "Radio power must be a number." );
+		bValid = bValid && checkRegexp( nwk_form_join_form_tips, radiopower, /^(0x){0,1}([0-9a-fA-F])*$/, "Radio power must be a number." );
 		if ( radiopower.val().length != 0 )
 			bValid = bValid && checkRange( nwk_form_join_form_tips, radiopower, "radio power", 0, 3 );
-		bValid = bValid && checkRegexp( nwk_form_join_form_tips, panid, /^(0x)*([0-9a-fA-F])*$/, "PAN ID must be a number." );
+		bValid = bValid && checkRegexp( nwk_form_join_form_tips, panid, /^(0x){0,1}([0-9a-fA-F])*$/, "PAN ID must be a number." );
 		if ( bValid ) {
 			var jsonData = {};
 			jsonData["action"] = action;
@@ -169,7 +169,7 @@ $(document).ready(function() {
 			"Permit join": function() {
 				var bValid = true;
 				allFields.removeClass( "ui-state-error" );
-				bValid = bValid && checkRegexp( permit_join_form_tips, pjoinduration, /^(0x)*([0-9a-fA-F])+$/, "Permit join duration must be a number." );
+				bValid = bValid && checkRegexp( permit_join_form_tips, pjoinduration, /^(0x){0,1}([0-9a-fA-F])+$/, "Permit join duration must be a number." );
 				bValid = bValid && checkRange( permit_join_form_tips, pjoinduration, "permit join duration", 0, 255 );
 				if ( bValid ) {
 					var bcast = 0;

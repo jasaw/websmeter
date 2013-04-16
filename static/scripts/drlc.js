@@ -12,7 +12,7 @@ $(document).ready(function() {
 	addhtos = $( "#addhtos" ),
 	allFields = $( [] ).add( addueg ).add( addstartdate ).add( addstarttime ).add( addduration ).add( addcrit_utility_level ).add( addavgload ).add( adddutycycle ).add( addctsp ).add( addhtsp ).add( addctos ).add( addhtos ),
 	tips = $( ".validateTips" );
-	$( "#addstartdate" ).datepicker({ minDate: new Date(2000, 1 - 1, 1), maxDate: new Date(2030, 1 - 1, 1), dateFormat: "dd/mm/yy" }).val();
+	$( "#addstartdate" ).datepicker({ minDate: new Date(2000, 1 - 1, 1), maxDate: new Date(2030, 1 - 1, 1), dateFormat: "yy-mm-dd" }).val();
 	$( "#addstarttime" ).timepicker();
 	add_drlc_event_form_tips = $( "#add-drlc-event-form-tips" );
 	rm_drlc_event_form_tips = $( "#rm-drlc-event-form-tips" );
@@ -36,8 +36,8 @@ $(document).ready(function() {
 			return true;
 		}
 	}
-	function checkRange( tip, o, n, min, max ) {
-		if ( (isNaN(parseInt(o.val()))) || (parseInt(o.val()) < min) || (parseInt(o.val()) > max) ) {
+	function checkRange( tip, parse_fptr, o, n, min, max ) {
+		if ( (isNaN(parse_fptr(o.val()))) || (parse_fptr(o.val()) < min) || (parse_fptr(o.val()) > max) ) {
 			o.addClass( "ui-state-error" );
 			updateTips( tip, "Input " + n + " must be between " + min + " and " + max + "." );
 			return false;
@@ -45,17 +45,20 @@ $(document).ready(function() {
 			return true;
 		}
 	}
-	function checkDateRange( tip, o, n, min, max ) {
-		if (isNaN(parseInt(o.val()))) {
-			o.addClass( "ui-state-error" );
+	function checkDateRange( tip, dui, tui, o_value, n, min, max ) {
+		if (isNaN(o_value)) {
+			dui.addClass( "ui-state-error" );
+			tui.addClass( "ui-state-error" );
 			updateTips( tip, "Input " + n + " is invalid." );
 			return false;
-		} else if (parseInt(o.val()) < min) {
-			o.addClass( "ui-state-error" );
+		} else if (o_value < min) {
+			dui.addClass( "ui-state-error" );
+			tui.addClass( "ui-state-error" );
 			updateTips( tip, "Input " + n + " must be later than " + new Date(min).toLocaleString() + "." );
 			return false;
-		} else if (parseInt(o.val()) > max) {
-			o.addClass( "ui-state-error" );
+		} else if (o_value > max) {
+			dui.addClass( "ui-state-error" );
+			tui.addClass( "ui-state-error" );
 			updateTips( tip, "Input " + n + " must be earlier than " + new Date(max).toLocaleString() + "." );
 			return false;
 		} else {
@@ -65,6 +68,15 @@ $(document).ready(function() {
 	function checkRegexp( tip, o, regexp, n ) {
 		if ( !( regexp.test( o.val() ) ) ) {
 			o.addClass( "ui-state-error" );
+			updateTips( tip, n );
+			return false;
+		} else {
+			return true;
+		}
+	}
+	function checkRadioGroup( tip, o_name, n ) {
+		var radio = $("input:radio[name=\"" + o_name + "\"]:checked");
+		if (radio.length == 0) {
 			updateTips( tip, n );
 			return false;
 		} else {
@@ -220,37 +232,111 @@ $(document).ready(function() {
 	}
 	$( "#add-drlc-event-form" ).dialog({
 		autoOpen: false,
-		height: 700,
+		height: 730,
 		width: 550,
 		modal: true,
 		buttons: {
 			"Add DRLC Event": function() {
 				var bValid = true;
 				allFields.removeClass( "ui-state-error" );
-				bValid = bValid && checkRegexp( add_drlc_event_form_tips, addueg, /^(0x)*([0-9a-fA-F])*$/, "Utility enrolment group must be a number." );
+				// at least one device class must be selected
+				var adddevcls_cbox = $("input:checkbox[name=\"adddevcls\"]:checked");
+				var devcls_value = 0;
+				adddevcls_cbox.each(function () {
+					devcls_value = devcls_value | $(this).val();
+				});
+				if ((bValid) && (devcls_value == 0)) {
+					updateTips( add_drlc_event_form_tips, "Please select at least one device class." );
+					bValid = false;
+				}
+				bValid = bValid && checkRegexp( add_drlc_event_form_tips, addueg, /^(0x){0,1}([0-9a-fA-F])*$/, "Utility enrolment group must be a number." );
 				if ( addueg.val().length != 0 )
-					bValid = bValid && checkRange( add_drlc_event_form_tips, addueg, "utility enrolment group", 0x00, 0xFF );
-				bValid = bValid && checkRegexp( add_drlc_event_form_tips, addstartdate, /^\d{1,2}\/\d{1,2}\/\d{4}$/, "Start date format must be dd/mm/yyyy." );
+					bValid = bValid && checkRange( add_drlc_event_form_tips, parseInt, addueg, "utility enrolment group", 0x00, 0xFF );
+				bValid = bValid && checkRegexp( add_drlc_event_form_tips, addstartdate, /^\d{4}-\d{1,2}-\d{1,2}$/, "Start date format must be yyyy-mm-dd." );
 				bValid = bValid && checkRegexp( add_drlc_event_form_tips, addstarttime, /^\d{1,2}:\d{2}$/, "Start time format must be hh:mm." );
-				// TODO: check date range
-				bValid = bValid && checkDateRange( add_drlc_event_form_tips, addstartdate      +     addstarttime, "start date", Date.UTC(2000,1-1,1), Date.UTC(2030,1-1,1) );
-
-
-
-				if ( radiopower.val().length != 0 )
-					bValid = bValid && checkRange( add_drlc_event_form_tips, radiopower, "radio power", 0, 3 );
-				bValid = bValid && checkRegexp( add_drlc_event_form_tips, panid, /^(0x)*([0-9a-fA-F])*$/, "PAN ID must be a number." );
-				alert("Add DRLC event not implemented yet");
-				/*
+				// check date range
+				var start_date_time = new Date(addstartdate.val() + "T" + addstarttime.val() + ":00");
+				var start_date_time_utc_seconds = Date.UTC(start_date_time.getUTCFullYear(), start_date_time.getUTCMonth(), start_date_time.getUTCDate(), start_date_time.getUTCHours(), start_date_time.getUTCMinutes());
+				bValid = bValid && checkDateRange( add_drlc_event_form_tips, addstartdate, addstarttime, start_date_time_utc_seconds, "start date", Date.UTC(2000,1-1,1), Date.UTC(2030,1-1,1) );
+				// duration
+				bValid = bValid && checkRegexp( add_drlc_event_form_tips, addduration, /^(0x){0,1}([0-9a-fA-F])$/, "Duration must be a number." );
+				bValid = bValid && checkRange( add_drlc_event_form_tips, parseInt, addduration, "duration", 1, 1440 );
+				// criticality must be selected
+				bValid = bValid && checkRadioGroup( add_drlc_event_form_tips, "addcrit", "Criticality must be selected" );
+				var critradio = $("input:radio[name=\"addcrit\"]:checked");
+				var crit_value = 0
+				if (bValid) {
+					if (critradio.val() == -1) {
+						bValid = bValid && checkRegexp( add_drlc_event_form_tips, addcrit_utility_level, /^(0x){0,1}([0-9a-fA-F])$/, "Utility defined criticality must be a number." );
+						bValid = bValid && checkRange( add_drlc_event_form_tips, parseInt, addcrit_utility_level, "utility defined criticality", 1, 6 );
+						crit_value = parseInt(addcrit_utility_level.val()) + 9;
+					} else {
+						crit_value = critradio.val();
+					}
+				}
+				// event control
+				var addectrl_cbox = $("input:checkbox[name=\"addectrl\"]:checked");
+				var ectrl_value = 0;
+				addectrl_cbox.each(function () {
+					ectrl_value = ectrl_value | $(this).val();
+				});
+				// optional inputs
+				var num_optionals = 0;
+				bValid = bValid && checkRegexp( add_drlc_event_form_tips, addavgload, /^(-){0,1}(0x){0,1}([0-9a-fA-F])*$/, "Average load must be a number." );
+				if ( addavgload.val().length != 0 ) {
+					bValid = bValid && checkRange( add_drlc_event_form_tips, parseInt, addavgload, "average load", -100, 100 );
+					num_optionals = num_optionals + 1;
+				}
+				bValid = bValid && checkRegexp( add_drlc_event_form_tips, adddutycycle, /^(0x){0,1}([0-9a-fA-F])*$/, "Duty cycle must be a number." );
+				if ( adddutycycle.val().length != 0 ) {
+					bValid = bValid && checkRange( add_drlc_event_form_tips, parseInt, adddutycycle, "duty cycle", 0, 100 );
+					num_optionals = num_optionals + 1;
+				}
+				bValid = bValid && checkRegexp( add_drlc_event_form_tips, addctsp, /^(-){0,1}([0-9])*(\.){0,1}([0-9])*$/, "Cooling temperature set point must be a number." );
+				if ( addctsp.val().length != 0 ) {
+					bValid = bValid && checkRange( add_drlc_event_form_tips, parseFloat, addctsp, "cooling temperature set point", -273.15, 327.66 );
+					num_optionals = num_optionals + 1;
+				}
+				bValid = bValid && checkRegexp( add_drlc_event_form_tips, addhtsp, /^(-){0,1}([0-9])*(\.){0,1}([0-9])*$/, "Heating temperature set point must be a number." );
+				if ( addhtsp.val().length != 0 ) {
+					bValid = bValid && checkRange( add_drlc_event_form_tips, parseFloat, addhtsp, "heating temperature set point", -273.15, 327.66 );
+					num_optionals = num_optionals + 1;
+				}
+				bValid = bValid && checkRegexp( add_drlc_event_form_tips, addctos, /^([0-9])*(\.){0,1}([0-9])*$/, "Cooling temperature offset must be a number." );
+				if ( addctos.val().length != 0 ) {
+					bValid = bValid && checkRange( add_drlc_event_form_tips, parseFloat, addctos, "cooling temperature offset", 0, 25.4 );
+					num_optionals = num_optionals + 1;
+				}
+				bValid = bValid && checkRegexp( add_drlc_event_form_tips, addhtos, /^([0-9])*(\.){0,1}([0-9])*$/, "Heating temperature offset must be a number." );
+				if ( addhtos.val().length != 0 ) {
+					bValid = bValid && checkRange( add_drlc_event_form_tips, parseFloat, addhtos, "heating temperature offset", 0, 25.4 );
+					num_optionals = num_optionals + 1;
+				}
+				if ((bValid) && (num_optionals == 0)) {
+					updateTips( add_drlc_event_form_tips, "Please fill at least one optional input." );
+					bValid = false;
+				}
 				if ( bValid ) {
 					var jsonData = {};
-					jsonData["action"] = action;
-					if ( radiochannel.val().length != 0 )
-						jsonData["channel"] = parseInt(radiochannel.val());
-					if ( radiopower.val().length != 0 )
-						jsonData["power"] = parseInt(radiopower.val());
-					if ( panid.val().length != 0 )
-						jsonData["panid"] = parseInt(panid.val());
+					jsonData["action"] = "add";
+					jsonData["dev"] = devcls_value;
+					jsonData["ueg"] = parseInt(addueg.val());
+					jsonData["start"] = parseInt(start_date_time_utc_seconds/1000);
+					jsonData["duration"] = parseInt(addduration.val());
+					jsonData["criticality"] = crit_value;
+					jsonData["ectrl"] = ectrl_value;
+					if (addavgload.val().length != 0)
+						jsonData["avgload"] = parseInt(addavgload.val());
+					if (adddutycycle.val().length != 0)
+						jsonData["dutycycle"] = parseInt(adddutycycle.val());
+					if (addctos.val().length != 0)
+						jsonData["cto"] = parseInt(addctos.val());
+					if (addhtos.val().length != 0)
+						jsonData["hto"] = parseInt(addhtos.val());
+					if (addctsp.val().length != 0)
+						jsonData["ctsp"] = parseInt(addctsp.val());
+					if (addhtsp.val().length != 0)
+						jsonData["htsp"] = parseInt(addhtsp.val());
 					var args = JSON.stringify(jsonData);
 					//alert(args);
 					o.dialog( "close" );
@@ -262,8 +348,8 @@ $(document).ready(function() {
 						dataType : "json",
 						success : function(response) {
 							if (response['status'] == 0) {
-								clearTimeout(requestNwkInfoTimer);
-								requestNwkInfoTimer = setTimeout(function () { requestNwkInfo(); }, 2000);
+								clearTimeout(requestDrlcEventsTimer);
+								requestDrlcEventsTimer = setTimeout(function () { requestDrlcEvents(); }, 750);
 							}
 						},
 						error : function(response) {
@@ -272,7 +358,6 @@ $(document).ready(function() {
 						}
 					});
 				}
-				*/
 			},
 			Cancel: function() {
 				$( this ).dialog( "close" );
@@ -284,7 +369,7 @@ $(document).ready(function() {
 	});
 	$( "#rm-drlc-event-form" ).dialog({
 		autoOpen: false,
-		height: 180,
+		height: 210,
 		width: 300,
 		modal: true,
 		buttons: {
@@ -313,8 +398,28 @@ $(document).ready(function() {
 	$( "#rm-all-drlc-events" )
 	.button()
 	.click(function() {
-		// TODO: remove all DRLC events
-		alert("Not implemented yet.");
+		// remove all DRLC events
+		var jsonData = {};
+		jsonData["action"] = "clear";
+		var args = JSON.stringify(jsonData);
+		//alert(args);
+		$.ajax({
+			type : "POST",
+			url : "/drlc/event",
+			data : args,
+			contentType : "application/json; charset=utf-8",
+			dataType : "json",
+			success : function(response) {
+				if (response['status'] == 0) {
+					clearTimeout(requestDrlcEventsTimer);
+					requestDrlcEventsTimer = setTimeout(function () { requestDrlcEvents(); }, 750);
+				}
+			},
+			error : function(response) {
+				//alert(response.errormsg);
+				alert("Unable to contact server. Please try again.");
+			}
+		});
 	});
 	$( "#refresh-drlc-events" )
 	.button()

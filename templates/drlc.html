@@ -10,28 +10,28 @@ $var cssfiles:
 				<label>Device Class</label><br>
 				<table>
 					<tr>
-						<td><input type="checkbox" name="adddevcls_compressor" id="adddevcls_compressor">HVAC compressor or furnace</td>
-						<td><input type="checkbox" name="adddevcls_waterheater" id="adddevcls_waterheater">Water heater</td>
+						<td><input type="checkbox" name="adddevcls" id="adddevcls_compressor" value=1>HVAC compressor or furnace</td>
+						<td><input type="checkbox" name="adddevcls" id="adddevcls_waterheater" value=4>Water heater</td>
 					</tr>
 					<tr>
-						<td><input type="checkbox" name="adddevcls_stripheater" id="adddevcls_stripheater">Strip or baseboard heaters</td>
-						<td><input type="checkbox" name="adddevcls_poolpump" id="adddevcls_poolpump">Pool pump or spa</td>
+						<td><input type="checkbox" name="adddevcls" id="adddevcls_stripheater" value=2>Strip or baseboard heaters</td>
+						<td><input type="checkbox" name="adddevcls" id="adddevcls_poolpump" value=8>Pool pump or spa</td>
 					</tr>
 					<tr>
-						<td><input type="checkbox" name="adddevcls_ciload" id="adddevcls_ciload">Managed commercial & industrial loads</td>
-						<td><input type="checkbox" name="adddevcls_irrpump" id="adddevcls_irrpump">Irrigation pump</td>
+						<td><input type="checkbox" name="adddevcls" id="adddevcls_ciload" value=64>Managed commercial & industrial loads</td>
+						<td><input type="checkbox" name="adddevcls" id="adddevcls_irrpump" value=32>Irrigation pump</td>
 					</tr>
 					<tr>
-						<td><input type="checkbox" name="adddevcls_miscload" id="adddevcls_miscload">Simple misc or residential loads</td>
-						<td><input type="checkbox" name="adddevcls_smartapp" id="adddevcls_smartapp">Smart appliances</td>
+						<td><input type="checkbox" name="adddevcls" id="adddevcls_miscload" value=128>Simple misc or residential loads</td>
+						<td><input type="checkbox" name="adddevcls" id="adddevcls_smartapp" value=16>Smart appliances</td>
 					</tr>
 					<tr>
-						<td><input type="checkbox" name="adddevcls_ev" id="adddevcls_ev">Electric vehicle</td>
-						<td><input type="checkbox" name="adddevcls_extlight" id="adddevcls_extlight">Exterior lighting</td>
+						<td><input type="checkbox" name="adddevcls" id="adddevcls_ev" value=1024>Electric vehicle</td>
+						<td><input type="checkbox" name="adddevcls" id="adddevcls_extlight" value=256>Exterior lighting</td>
 					</tr>
 					<tr>
-						<td><input type="checkbox" name="adddevcls_gensys" id="adddevcls_gensys">Generation systems</td>
-						<td><input type="checkbox" name="adddevcls_intlight" id="adddevcls_intlight">Interior lighting</td>
+						<td><input type="checkbox" name="adddevcls" id="adddevcls_gensys" value=2048>Generation systems</td>
+						<td><input type="checkbox" name="adddevcls" id="adddevcls_intlight" value=512>Interior lighting</td>
 					</tr>
 				</table>
 			</div>
@@ -53,24 +53,24 @@ $var cssfiles:
 				<label>Criticality</label><br>
 				<table>
 					<tr>
-						<td><input type="radio" name="addcrit" id="addcrit_green">Green</td>
-						<td><input type="radio" name="addcrit" id="addcrit_level5">Level 5</td>
+						<td><input type="radio" name="addcrit" id="addcrit_green" value=1>Green</td>
+						<td><input type="radio" name="addcrit" id="addcrit_level5" value=6>Level 5</td>
 					</tr>
 					<tr>
-						<td><input type="radio" name="addcrit" id="addcrit_level1">Level 1</td>
-						<td><input type="radio" name="addcrit" id="addcrit_emergency">Emergency</td>
+						<td><input type="radio" name="addcrit" id="addcrit_level1" value=2>Level 1</td>
+						<td><input type="radio" name="addcrit" id="addcrit_emergency" value=7>Emergency</td>
 					</tr>
 					<tr>
-						<td><input type="radio" name="addcrit" id="addcrit_level2">Level 2</td>
-						<td><input type="radio" name="addcrit" id="addcrit_outage">Planned outage</td>
+						<td><input type="radio" name="addcrit" id="addcrit_level2" value=3>Level 2</td>
+						<td><input type="radio" name="addcrit" id="addcrit_outage" value=8>Planned outage</td>
 					</tr>
 					<tr>
-						<td><input type="radio" name="addcrit" id="addcrit_level3">Level 3</td>
-						<td><input type="radio" name="addcrit" id="addcrit_disconnect">Service disconnect</td>
+						<td><input type="radio" name="addcrit" id="addcrit_level3" value=4>Level 3</td>
+						<td><input type="radio" name="addcrit" id="addcrit_disconnect" value=9>Service disconnect</td>
 					</tr>
 					<tr>
-						<td><input type="radio" name="addcrit" id="addcrit_level4">Level 4</td>
-						<td><input type="radio" name="addcrit" id="addcrit_utility">Utility defined
+						<td><input type="radio" name="addcrit" id="addcrit_level4" value=5>Level 4</td>
+						<td><input type="radio" name="addcrit" id="addcrit_utility" value=-1>Utility defined
 						<input type="text" name="addcrit_utility_level" id="addcrit_utility_level" value="" class="text ui-widget-content ui-corner-all" title="Between 1 and 6." /></td>
 					</tr>
 				</table>
@@ -79,8 +79,8 @@ $var cssfiles:
 				<label>Event Control</label><br>
 				<table>
 					<tr>
-						<td><input type="checkbox" name="addectrl_randstart" id="addectrl_randstart">Randomise start time</td>
-						<td><input type="checkbox" name="addectrl_randend" id="addectrl_randend">Randomise end time</td>
+						<td><input type="checkbox" name="addectrl" id="addectrl_randstart" value=1>Randomise start time</td>
+						<td><input type="checkbox" name="addectrl" id="addectrl_randend" value=2>Randomise end time</td>
 					</tr>
 				</table>
 			</div>
