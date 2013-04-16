@@ -374,8 +374,36 @@ $(document).ready(function() {
 		modal: true,
 		buttons: {
 			"Remove DRLC event": function() {
-				// TODO: remove DRLC event
-				alert("Remove DRLC event not implemented yet");
+				var bValid = true;
+				allFields.removeClass( "ui-state-error" );
+				// duration
+				bValid = bValid && checkRegexp( rm_drlc_event_form_tips, rmeventid, /^(0x){0,1}([0-9a-fA-F])$/, "Event ID must be a number." );
+				bValid = bValid && checkRange( rm_drlc_event_form_tips, parseInt, rmeventid, "event ID", 0, 0xFFFFFFFF );
+				if ( bValid ) {
+					var jsonData = {};
+					jsonData["action"] = "rm";
+					jsonData["eid"] = parseInt(rmeventid.val());
+					var args = JSON.stringify(jsonData);
+					//alert(args);
+					o.dialog( "close" );
+					$.ajax({
+						type : "POST",
+						url : "/drlc/event",
+						data : args,
+						contentType : "application/json; charset=utf-8",
+						dataType : "json",
+						success : function(response) {
+							if (response['status'] == 0) {
+								clearTimeout(requestDrlcEventsTimer);
+								requestDrlcEventsTimer = setTimeout(function () { requestDrlcEvents(); }, 750);
+							}
+						},
+						error : function(response) {
+							//alert(response.errormsg);
+							alert("Unable to contact server. Please try again.");
+						}
+					});
+				}
 			},
 			Cancel: function() {
 				$( this ).dialog( "close" );
