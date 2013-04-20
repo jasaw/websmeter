@@ -12,8 +12,9 @@ $(document).ready(function() {
 	addhtos = $( "#addhtos" ),
 	sendeventid = $( "#sendeventid" ),
 	sendnodeid = $( "#sendnodeid" ),
+	senddstep = $( "#senddstep" ),
 	rmeventid = $( "#rmeventid" ),
-	allFields = $( [] ).add(addueg).add(addstartdate).add(addstarttime).add(addduration).add(addcrit_utility_level).add(addavgload).add(adddutycycle).add(addctsp).add(addhtsp).add(addctos).add(addhtos).add(sendeventid).add(sendnodeid).add(rmeventid),
+	allFields = $( [] ).add(addueg).add(addstartdate).add(addstarttime).add(addduration).add(addcrit_utility_level).add(addavgload).add(adddutycycle).add(addctsp).add(addhtsp).add(addctos).add(addhtos).add(sendeventid).add(sendnodeid).add(senddstep).add(rmeventid),
 	tips = $( ".validateTips" );
 	$( "#addstartdate" ).datepicker({ minDate: new Date(2000, 1 - 1, 1), maxDate: new Date(2030, 1 - 1, 1), dateFormat: "yy-mm-dd" }).val();
 	$( "#addstarttime" ).timepicker();
@@ -403,17 +404,30 @@ $(document).ready(function() {
 				});
 				var allnodes = sendnodeid.val().split(",");
 				var allnodes_array = new Array();
-				$.each(allids, function(index, value) {
+				$.each(allnodes, function(index, value) {
 					bValid = bValid && checkRegexpVal( send_drlc_event_form_tips, sendnodeid, value.trim(), /^(0x){0,1}([0-9a-fA-F])+$/, "Node ID must be a number." );
 					bValid = bValid && checkRangeVal( send_drlc_event_form_tips, parseInt, sendnodeid, value.trim(), "node ID", 0, 0xFFFFFFFF );
 					if (bValid)
 						allnodes_array.push(parseInt(value.trim()))
 				});
+				var alleps = senddstep.val().split(",");
+				var alleps_array = new Array();
+				$.each(alleps, function(index, value) {
+					bValid = bValid && checkRegexpVal( send_drlc_event_form_tips, senddstep, value.trim(), /^(0x){0,1}([0-9a-fA-F])+$/, "End point must be a number." );
+					bValid = bValid && checkRangeVal( send_drlc_event_form_tips, parseInt, senddstep, value.trim(), "end point", 1, 240 );
+					if (bValid)
+						alleps_array.push(parseInt(value.trim()))
+				});
+				if ((bValid) && (allnodes_array.length != alleps_array.length)) {
+					updateTips( send_drlc_event_form_tips, "Node IDs and End Points do not match." );
+					bValid = false;
+				}
 				if ( bValid ) {
 					var jsonData = {};
 					jsonData["action"] = "send";
 					jsonData["eids"] = allids_array;
 					jsonData["nodes"] = allnodes_array;
+					jsonData["eps"] = alleps_array;
 					var args = JSON.stringify(jsonData);
 					//alert(args);
 					$( this ).dialog( "close" );

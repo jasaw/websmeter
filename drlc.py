@@ -114,6 +114,35 @@ class event(object):
                 status = smartmeter.smeter.smctrl.drlc_mgr.add_event(**kwargs)
                 #d.log("status %s", status)
 
+            elif action == 'send':
+                event_ids = common.getJsonArg("eids", None)
+                if not isinstance(event_ids, list):
+                    return json.dumps({"status": -1, "errormsg": "Malformed event ID input"})
+                for eid in event_ids:
+                    if not isinstance(eid, (int,long)):
+                        return json.dumps({"status": -1, "errormsg": "Malformed event ID input"})
+                nodes = common.getJsonArg("nodes", None)
+                if not isinstance(nodes, list):
+                    return json.dumps({"status": -1, "errormsg": "Malformed Node ID input"})
+                for n in nodes:
+                    if not isinstance(n, (int)):
+                        return json.dumps({"status": -1, "errormsg": "Malformed Node ID input"})
+                eps = common.getJsonArg("eps", None)
+                if not isinstance(eps, list):
+                    return json.dumps({"status": -1, "errormsg": "Malformed End Point input"})
+                for ep in eps:
+                    if not isinstance(ep, (int)):
+                        return json.dumps({"status": -1, "errormsg": "Malformed End Point input"})
+                if len(nodes) != len(eps):
+                    return json.dumps({"status": -1, "errormsg": "Malformed Node ID and End Point input"})
+
+                status = True
+                for eid in event_ids:
+                    for i in range(len(nodes)):
+                        tmp_status = smartmeter.smeter.smctrl.drlc_mgr.send_event(eid, nodes[i], eps[i])
+                        if not tmp_status:
+                            status = False
+
             elif action == 'rm':
                 event_ids = common.getJsonArg("eids", None)
                 if not isinstance(event_ids, list):

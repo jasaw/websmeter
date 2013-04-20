@@ -498,7 +498,7 @@ class ZbDrlcMgr(object):
         return status
 
     def rm_event(self, event_id):
-        if self.ready and len(self.pending_cmd) < self.max_num_events:
+        if self.ready and len(self.pending_cmd) < self.max_num_events*5:
             self.lock.acquire()
             e = self._find_event_by_id(self.drlc_events, event_id)
             if e is not None:
@@ -529,6 +529,22 @@ class ZbDrlcMgr(object):
             self.lock.release()
             return True
         return False
+
+    def send_event(self, event_id, dst_node_id, dst_end_point):
+        #plugin drlc-server sslce <nodeId:2> <srcEndpoint:1> <dstEndpoint:1> <index:1>
+        #plugin drlc-server sslce 0x25d7 1 9 0
+        status = False
+        if self.ready and \
+           dst_node_id >= 0 and dst_node_id <= 0xFFFF and \
+           dst_end_point > 0 and dst_end_point < 0xFF and \
+           len(self.pending_cmd) < self.max_num_events*5:
+            self.lock.acquire()
+            e = self._find_event_by_id(self.drlc_events, event_id)
+            if e is not None:
+                self.pending_cmd.append('plugin drlc-server sslce 0x%x %d %d %d\n' % (dst_node_id, self.end_point, dst_end_point, e.index))
+                status = True
+            self.lock.release()
+        return status
 
     def refresh_drlc_table(self):
         now = time.time()
