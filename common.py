@@ -14,14 +14,10 @@ def getJsonArg(sArg, sDefault=""):
 
         if dic:
             if dic.has_key(sArg):
-                if dic[sArg]:
-                    return dic[sArg]
-                else:
-                    return sDefault
+                return dic[sArg]
             else:
                 return sDefault
         else:
             return sDefault
     except ValueError:
         raise Exception("getJsonArg - no JSON arguments to decode. This method required a POST with JSON arguments.")
-

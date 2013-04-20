@@ -31,6 +31,8 @@ class event(object):
             rsp['events'] = smartmeter.smeter.smctrl.drlc_mgr.get_all_events()
             rsp['maxnumevents'] = smartmeter.smeter.smctrl.drlc_mgr.max_num_events
             rsp['status'] = 0
+            #d = logger.Logger("drlc.py")
+            #d.log("rsp: %s", rsp)
             return json.dumps(rsp)
 
         except Exception, ex:
@@ -43,56 +45,87 @@ class event(object):
             status = False
             action = common.getJsonArg("action", "")
             if action == 'add':
+                kwargs = {}
                 # mandatory inputs
                 device_class = common.getJsonArg("dev", None)
                 if not isinstance(device_class, (int)):
                     return json.dumps({"status": -1, "errormsg": "Malformed device class input"})
+                kwargs['dev'] = device_class
                 ueg = common.getJsonArg("ueg", None)
                 if not isinstance(ueg, (int)):
                     return json.dumps({"status": -1, "errormsg": "Malformed utility enrolment group input"})
+                kwargs['ueg'] = ueg
                 start_time = common.getJsonArg("start", None)
-                if not isinstance(start_time, (int)):
+                if not isinstance(start_time, (int,long)):
                     return json.dumps({"status": -1, "errormsg": "Malformed start time input"})
+                kwargs['start_time'] = start_time
                 duration = common.getJsonArg("duration", None)
                 if not isinstance(duration, (int)):
                     return json.dumps({"status": -1, "errormsg": "Malformed duration input"})
+                kwargs['duration'] = duration
                 criticality = common.getJsonArg("criticality", None)
                 if not isinstance(criticality, (int)):
                     return json.dumps({"status": -1, "errormsg": "Malformed criticality input"})
+                kwargs['criticality'] = criticality
                 event_control = common.getJsonArg("ectrl", None)
                 if not isinstance(event_control, (int)):
                     return json.dumps({"status": -1, "errormsg": "Malformed event control input"})
+                kwargs['ectrl'] = event_control
                 # optional inputs
                 cto = common.getJsonArg("cto", None)
-                if cto is not None and not isinstance(cto, (int)):
-                    return json.dumps({"status": -1, "errormsg": "Malformed cooling temp offset input"})
+                if cto is not None:
+                    if not isinstance(cto, (int)):
+                        return json.dumps({"status": -1, "errormsg": "Malformed cooling temp offset input"})
+                    else:
+                        kwargs['cto'] = cto
                 hto = common.getJsonArg("hto", None)
-                if hto is not None and not isinstance(hto, (int)):
-                    return json.dumps({"status": -1, "errormsg": "Malformed heating temp offset input"})
+                if hto is not None:
+                    if not isinstance(hto, (int)):
+                        return json.dumps({"status": -1, "errormsg": "Malformed heating temp offset input"})
+                    else:
+                        kwargs['hto'] = hto
                 ctsp = common.getJsonArg("ctsp", None)
-                if ctsp is not None and not isinstance(ctsp, (int)):
-                    return json.dumps({"status": -1, "errormsg": "Malformed cooling temp set point input"})
+                if ctsp is not None:
+                    if not isinstance(ctsp, (int)):
+                        return json.dumps({"status": -1, "errormsg": "Malformed cooling temp set point input"})
+                    else:
+                        kwargs['ctsp'] = ctsp
                 htsp = common.getJsonArg("htsp", None)
-                if htsp is not None and not isinstance(htsp, (int)):
-                    return json.dumps({"status": -1, "errormsg": "Malformed heating temp set point input"})
+                if htsp is not None:
+                    if not isinstance(htsp, (int)):
+                        return json.dumps({"status": -1, "errormsg": "Malformed heating temp set point input"})
+                    else:
+                        kwargs['htsp'] = htsp
                 avgload = common.getJsonArg("avgload", None)
-                if avgload is not None and not isinstance(avgload, (int)):
-                    return json.dumps({"status": -1, "errormsg": "Malformed average load input"})
+                if avgload is not None:
+                    if not isinstance(avgload, (int)):
+                        return json.dumps({"status": -1, "errormsg": "Malformed average load input"})
+                    else:
+                        kwargs['avgload'] = avgload
                 dutycycle = common.getJsonArg("dutycycle", None)
-                if dutycycle is not None and not isinstance(dutycycle, (int)):
-                    return json.dumps({"status": -1, "errormsg": "Malformed duty cycle input"})
+                if dutycycle is not None:
+                    if not isinstance(dutycycle, (int)):
+                        return json.dumps({"status": -1, "errormsg": "Malformed duty cycle input"})
+                    else:
+                        kwargs['dutycycle'] = dutycycle
                 # add event
-                status = smartmeter.smeter.smctrl.drlc_mgr.add_event(
-                    device_class=device_class, ueg=ueg, start_time=start_time,
-                    duration=duration, criticality=criticality, ectrl=event_control,
-                    cto=cto, hto=hto, ctsp=ctsp, htsp=htsp,
-                    avgload=avgload, dutycycle=dutycycle)
+                #d = logger.Logger("drlc.py")
+                #d.log("going to add event")
+                status = smartmeter.smeter.smctrl.drlc_mgr.add_event(**kwargs)
+                #d.log("status %s", status)
 
             elif action == 'rm':
-                event_id = common.getJsonArg("eid", None)
-                if event_id is not None and not isinstance(event_id, (int,long)):
+                event_ids = common.getJsonArg("eids", None)
+                if not isinstance(event_ids, list):
                     return json.dumps({"status": -1, "errormsg": "Malformed event ID input"})
-                status = smartmeter.smeter.smctrl.drlc_mgr.rm_event(event_id)
+                for eid in event_ids:
+                    if not isinstance(eid, (int,long)):
+                        return json.dumps({"status": -1, "errormsg": "Malformed event ID input"})
+                status = True
+                for eid in event_ids:
+                    tmp_status = smartmeter.smeter.smctrl.drlc_mgr.rm_event(eid)
+                    if not tmp_status:
+                        status = False
 
             elif action == 'clear':
                 status = smartmeter.smeter.smctrl.drlc_mgr.rm_all_events()

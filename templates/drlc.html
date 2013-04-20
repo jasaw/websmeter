@@ -41,9 +41,9 @@ $var cssfiles:
 			</div>
 			<div>
 				<label for="addstartdate">Start Date</label>
-				<input type="text" name="addstartdate" id="addstartdate" value="" class="text ui-widget-content ui-corner-all" />
+				<input type="text" name="addstartdate" id="addstartdate" value="" class="text ui-widget-content ui-corner-all" title="In local time" />
 				<label for="addstarttime">Time</label>
-				<input type="text" name="addstarttime" id="addstarttime" value="" class="text ui-widget-content ui-corner-all" />
+				<input type="text" name="addstarttime" id="addstarttime" value="" class="text ui-widget-content ui-corner-all" title="In local time" />
 			</div>
 			<div>
 				<label for="addduration">Duration</label>
@@ -112,13 +112,29 @@ $var cssfiles:
 	</form>
 </div>
 
+<div id="send-drlc-event-form" title="Send DRLC Event">
+	<p id="send-drlc-event-form-tips"></p>
+	<form>
+		<fieldset>
+			<div>
+				<label for="sendeventid">Event ID</label>
+				<input type="text" name="sendeventid" id="sendeventid" value="" class="text ui-widget-content ui-corner-all" title="Enter multiple IDs by comma separating them." />
+			</div>
+			<div>
+				<label for="sendnodeid">Node ID</label>
+				<input type="text" name="sendnodeid" id="sendnodeid" value="" class="text ui-widget-content ui-corner-all" title="Enter multiple IDs by comma separating them." />
+			</div>
+		</fieldset>
+	</form>
+</div>
+
 <div id="rm-drlc-event-form" title="Remove DRLC Event">
 	<p id="rm-drlc-event-form-tips"></p>
 	<form>
 		<fieldset>
 			<div>
 				<label for="rmeventid">Event ID</label>
-				<input type="text" name="rmeventid" id="rmeventid" value="" class="text ui-widget-content ui-corner-all" />
+				<input type="text" name="rmeventid" id="rmeventid" value="" class="text ui-widget-content ui-corner-all" title="Enter multiple IDs by comma separating them." />
 			</div>
 		</fieldset>
 	</form>
@@ -133,7 +149,7 @@ $var cssfiles:
 					<th>ID</th>
 					<th>Device Class</th>
 					<th>Utility Enrolment Group</th>
-					<th>Start Time</th>
+					<th>Start Time (local)</th>
 					<th>Duration (minutes)</th>
 					<th>Criticality</th>
 					<th>Event Control</th>
@@ -157,6 +173,10 @@ $var cssfiles:
 
 <div>
 	<button id="add-drlc-event">Add event</button>
+	<button id="send-drlc-event">Send event</button>
+</div>
+
+<div>
 	<button id="rm-drlc-event">Remove event</button>
 	<button id="rm-all-drlc-events">Remove all events</button>
 </div>

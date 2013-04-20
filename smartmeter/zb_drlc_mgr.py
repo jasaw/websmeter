@@ -54,8 +54,8 @@ CRITICALITY_LEVEL = {
 
 EVENT_NOT_SET = 0xFF
 TEMPERATURE_OFFSET_NOT_USED = 0xFF
-TEMPERATURE_SET_POINT_NOT_USED = 0x8000
-AVERAGE_LOAD_NOT_USED = 0x80
+TEMPERATURE_SET_POINT_NOT_USED = -32768
+AVERAGE_LOAD_NOT_USED = -128
 DUTY_CYCLE_NOT_USED = 0xFF
 
 # bit map
@@ -85,6 +85,25 @@ def get_next_issuer_event_id():
     if current_issuer_event_id > MAX_ISSUER_EVENT_ID:
         current_issuer_event_id = 1
     return current_issuer_event_id
+
+def get_byte_mask(num_bytes):
+    mask = 0
+    for i in range(num_bytes):
+        mask = (mask << 8) | 0xFF
+    return mask
+
+def signed_hex_to_decimal(number, num_bytes):
+    mask = get_byte_mask(num_bytes)
+    number = number & mask
+    if number & (1 << (num_bytes*8 - 1)):
+        return ~(mask - number)
+    else:
+        return number
+
+def clip_number(number, num_bytes):
+    mask = get_byte_mask(num_bytes)
+    return number & mask
+
 
 
 class ZbDrlcEvent(object):
@@ -140,10 +159,12 @@ class ZbDrlcEvent(object):
             raise BadArgumentError('Invalid cooling temperature offset: ' + str(self.cool_temp_offset))
         if self.heat_temp_offset > 0xFF or self.heat_temp_offset < 0:
             raise BadArgumentError('Invalid heating temperature offset: ' + str(self.heat_temp_offset))
-        if self.cool_temp_set > 0x8000 or self.cool_temp_set < -27315:
-            raise BadArgumentError('Invalid cooling temperature set point: ' + str(self.cool_temp_set))
-        if self.heat_temp_set > 0x8000 or self.heat_temp_set < -27315:
-            raise BadArgumentError('Invalid heating temperature set point: ' + str(self.heat_temp_set))
+        if self.cool_temp_set != TEMPERATURE_SET_POINT_NOT_USED:
+            if self.cool_temp_set > 32767 or self.cool_temp_set < -27315:
+                raise BadArgumentError('Invalid cooling temperature set point: ' + str(self.cool_temp_set))
+        if self.heat_temp_set != TEMPERATURE_SET_POINT_NOT_USED:
+            if self.heat_temp_set > 32767 or self.heat_temp_set < -27315:
+                raise BadArgumentError('Invalid heating temperature set point: ' + str(self.heat_temp_set))
         if self.average_load != AVERAGE_LOAD_NOT_USED:
             if self.average_load > 100 or self.average_load < -100:
                 raise BadArgumentError('Invalid average load adjustment percentage: ' + str(self.average_load))
@@ -219,8 +240,8 @@ class ZbDrlcEvent(object):
             self.duty_cycle = dutycycle
         if ectrl is not None:
             self.event_control = ectrl
-        self._check_event_values()
         self.lock.release()
+        self._check_event_values()
 
     def is_set(self):
         if self.source == EVENT_NOT_SET:
@@ -245,19 +266,22 @@ class ZbDrlcEvent(object):
     def set_event_raw_bytes(self):
         #  80 00 00 00 ff 0f 00 10 27 00 00 30 00 01 ff ff 00 80 00 80 2a 32 02
         # | Event ID  |class|gp| StartTime | Dur |CL|Co|Ho|CSet |HSet |AL|DC|EC|
-        eid_str = self._format_bytes(self._byte_swap('%08X' % self.event_id))
-        dev_str = self._format_bytes(self._byte_swap('%04X' % self.device_class))
-        gp_str = self._format_bytes(self._byte_swap('%02X' % self.utility_group))
-        st_str = self._format_bytes(self._byte_swap('%08X' % self.start_time))
-        dur_str = self._format_bytes(self._byte_swap('%04X' % self.duration))
-        cl_str = self._format_bytes(self._byte_swap('%02X' % self.criticality_value))
-        co_str = self._format_bytes(self._byte_swap('%02X' % self.cool_temp_offset))
-        ho_str = self._format_bytes(self._byte_swap('%02X' % self.heat_temp_offset))
-        cset_str = self._format_bytes(self._byte_swap('%04X' % self.cool_temp_set))
-        hset_str = self._format_bytes(self._byte_swap('%04X' % self.heat_temp_set))
-        al_str = self._format_bytes(self._byte_swap('%02X' % self.average_load))
-        dc_str = self._format_bytes(self._byte_swap('%02X' % self.duty_cycle))
-        ec_str = self._format_bytes(self._byte_swap('%02X' % self.event_control))
+        mask1 =  get_byte_mask(1)
+        mask2 =  get_byte_mask(2)
+        mask4 =  get_byte_mask(4)
+        eid_str = self._format_bytes(self._byte_swap('%08X' % (self.event_id & mask4)))
+        dev_str = self._format_bytes(self._byte_swap('%04X' % (self.device_class & mask2)))
+        gp_str = self._format_bytes(self._byte_swap('%02X' % (self.utility_group & mask1)))
+        st_str = self._format_bytes(self._byte_swap('%08X' % (self.start_time & mask4)))
+        dur_str = self._format_bytes(self._byte_swap('%04X' % (self.duration & mask2)))
+        cl_str = self._format_bytes(self._byte_swap('%02X' % (self.criticality_value & mask1)))
+        co_str = self._format_bytes(self._byte_swap('%02X' % (self.cool_temp_offset & mask1)))
+        ho_str = self._format_bytes(self._byte_swap('%02X' % (self.heat_temp_offset & mask1)))
+        cset_str = self._format_bytes(self._byte_swap('%04X' % (self.cool_temp_set & mask2)))
+        hset_str = self._format_bytes(self._byte_swap('%04X' % (self.heat_temp_set & mask2)))
+        al_str = self._format_bytes(self._byte_swap('%02X' % (self.average_load & mask1)))
+        dc_str = self._format_bytes(self._byte_swap('%02X' % (self.duty_cycle & mask1)))
+        ec_str = self._format_bytes(self._byte_swap('%02X' % (self.event_control & mask1)))
         return eid_str + dev_str + gp_str + st_str + dur_str + cl_str + co_str + ho_str + cset_str + hset_str + al_str + dc_str + ec_str
 
 
@@ -285,7 +309,7 @@ class ZbDrlcMgr(object):
         self.read_drlc_table = True
         self.drlc_events = []
         self.drlc_events_to_add = []
-        self.pending_cmd = None
+        self.pending_cmd = []
         self.mrsp = []
         event_start_tag = r'= LCE ([0-9]*) ='
         event_table_size_tag = r'Table size: ([0-9]*)'
@@ -341,22 +365,22 @@ class ZbDrlcMgr(object):
         event.criticality_value = int(match.group(1),16)
 
     def _extract_matched_cooling_offset(self, event, match):
-        event.cool_temp_offset = int(match.group(1),16)
+        event.cool_temp_offset = clip_number(int(match.group(1)[-2:],16),1)
 
     def _extract_matched_heating_offset(self, event, match):
-        event.heat_temp_offset = int(match.group(1),16)
+        event.heat_temp_offset = clip_number(int(match.group(1)[-2:],16),1)
 
     def _extract_matched_cooling_set(self, event, match):
-        event.cool_temp_set = int(match.group(1),16)
+        event.cool_temp_set = signed_hex_to_decimal(int(match.group(1)[-4:],16),2)
 
     def _extract_matched_heating_set(self, event, match):
-        event.heat_temp_set = int(match.group(1),16)
+        event.heat_temp_set = signed_hex_to_decimal(int(match.group(1)[-4:],16),2)
 
     def _extract_matched_average_load(self, event, match):
-        event.average_load = int(match.group(1),16)
+        event.average_load = signed_hex_to_decimal(int(match.group(1)[-2:],16),1)
 
     def _extract_matched_duty_cycle(self, event, match):
-        event.duty_cycle = int(match.group(1),16)
+        event.duty_cycle = clip_number(int(match.group(1)[-2:],16),1)
 
     def _extract_matched_event_control(self, event, match):
         event.event_control = int(match.group(1),16)
@@ -388,7 +412,7 @@ class ZbDrlcMgr(object):
         # oc: 0x00
         eid_tag = r'eid: (0x[a-fA-F0-9]*)'
         src_tag = r'src: (0x[a-fA-F0-9]*)'
-        dev_tag = r'def: (0x[a-fA-F0-9]*)'
+        dev_tag = r'dev: (0x[a-fA-F0-9]*)'
         ueg_tag = r'ueg: (0x[a-fA-F0-9]*)'
         start_tag = r' st: (0x[a-fA-F0-9]*)'
         duration_tag = r'dur: (0x[a-fA-F0-9]*)'
@@ -399,7 +423,7 @@ class ZbDrlcMgr(object):
         hts_tag = r'hts: (0x[a-fA-F0-9]*)'
         avgload_tag = r'alp: (0x[a-fA-F0-9]*)'
         dutycycle_tag = r' dc: (0x[a-fA-F0-9]*)'
-        ectrl_tag = r'ev: (0x[a-fA-F0-9]*)'
+        ectrl_tag = r' ev: (0x[a-fA-F0-9]*)'
         tags = [(eid_tag,           self._extract_matched_event_id),
                 (src_tag,           self._extract_matched_event_source),
                 (dev_tag,           self._extract_matched_device_class),
@@ -432,11 +456,12 @@ class ZbDrlcMgr(object):
                 if tag_index + 1 < len(tags):
                     tag_index = tag_index + 1
                     t, f = tags[tag_index]
+        #self.logger.log('%s', the_event)
         if the_event.is_set() and the_event.is_valid():
             global current_issuer_event_id
             for e in self.drlc_events:
-                if e.eid > current_issuer_event_id:
-                    current_issuer_event_id = e.eid
+                if e.event_id > current_issuer_event_id:
+                    current_issuer_event_id = e.event_id
             self.drlc_events.sort(key=lambda e: e.index)
         else:
             self.drlc_events.remove(the_event)
@@ -450,24 +475,15 @@ class ZbDrlcMgr(object):
                 all_events.append(e.get_event())
         return all_events
 
-    def add_event(self, device_class=DEVICE_CLASS['ALL'], ueg=UTILITY_ENROLMENT_GROUP['ALL'],
-                  start_time=0, duration=0, criticality=CRITICALITY_LEVEL['GREEN'],
-                  cto=TEMPERATURE_OFFSET_NOT_USED, hto=TEMPERATURE_OFFSET_NOT_USED,
-                  ctsp=TEMPERATURE_SET_POINT_NOT_USED, htsp=TEMPERATURE_SET_POINT_NOT_USED,
-                  avgload=AVERAGE_LOAD_NOT_USED, dutycycle=DUTY_CYCLE_NOT_USED,
-                  ectrl=EVENT_CONTROL['NONE']):
+    def add_event(self, **kwargs):
         status = False
         if self.ready:
             self.lock.acquire()
             try:
-                the_event = ZbDrlcEvent(dev=device_class, ueg=ueg,
-                                        start_time=start_time, duration=duration,
-                                        criticality=criticality,
-                                        cto=cto, hto=hto, ctsp=ctsp, htsp=htsp,
-                                        avgload=avgload, dutycycle=dutycycle,
-                                        ectrl=ectrl)
+                the_event = ZbDrlcEvent(**kwargs)
                 # find an empty index
                 the_event.index = self._get_next_free_drlc_index()
+                #self.logger.log('%s', the_event.index)
                 if the_event.index is not None:
                     # fill in event ID
                     the_event.event_id = get_next_issuer_event_id()
@@ -482,30 +498,32 @@ class ZbDrlcMgr(object):
         return status
 
     def rm_event(self, event_id):
-        if self.ready and self.pending_cmd is None:
+        if self.ready and len(self.pending_cmd) < self.max_num_events:
             self.lock.acquire()
             e = self._find_event_by_id(self.drlc_events, event_id)
             if e is not None:
                 # TODO: add remove single event to smart meter
                 # command below does not exist yet
-                self.pending_cmd = 'plugin drlc-server clce %d %d\n' % (self.end_point, e.index)
+                self.pending_cmd.append('plugin drlc-server clce %d %d\n' % (self.end_point, e.index))
                 self._expire_cache()
                 self.refresh_drlc_table()
                 self.drlc_events.remove(e)
+                self.lock.release()
                 return True
             e = self._find_event_by_id(self.drlc_events_to_add, event_id)
             if e is not None:
                 self.drlc_events_to_add.remove(e)
+                self.lock.release()
                 return True
             self.lock.release()
         return False
 
     def rm_all_events(self):
-        if self.ready and self.pending_cmd is None:
+        if self.ready and len(self.pending_cmd) == 0:
             self.lock.acquire()
             self.drlc_events = []
             self.drlc_events_to_add = []
-            self.pending_cmd = 'plugin drlc-server cslce %d\n' % self.end_point
+            self.pending_cmd.append('plugin drlc-server cslce %d\n' % self.end_point)
             self._expire_cache()
             self.refresh_drlc_table()
             self.lock.release()
@@ -514,10 +532,8 @@ class ZbDrlcMgr(object):
 
     def refresh_drlc_table(self):
         now = time.time()
-        self.lock.acquire()
         if now - self.last_req > self.cache_duration:
             self.read_drlc_table = True
-        self.lock.release()
 
     def handle_rsp(self, rsp_line):
         accepted = False
@@ -530,12 +546,18 @@ class ZbDrlcMgr(object):
     def process(self):
         cmds = []
         self.lock.acquire()
-        if self.pending_cmd is not None:
-            cmds.append(self.pending_cmd)
-            self.pending_cmd = None
+        if len(self.pending_cmd) > 0:
+            cmds.extend(self.pending_cmd)
+            self.pending_cmd = []
         if len(self.drlc_events_to_add) > 0:
             for e in self.drlc_events_to_add:
+                #self.logger.log('cmd: %s', e)
                 cmds.append('plugin drlc-server slce %d %d %d {%s}\n' % (self.end_point, e.index, e.data_length, e.set_event_raw_bytes()))
+                entry = self._find_event_by_index(self.drlc_events, e.index)
+                if entry is not None:
+                    self.drlc_events.remove(entry)
+                    self.drlc_events.append(e)
+            self.drlc_events.sort(key=lambda e: e.index)
             self._expire_cache()
             self.refresh_drlc_table()
             self.drlc_events_to_add = []

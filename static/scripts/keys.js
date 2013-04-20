@@ -73,6 +73,8 @@ $(document).ready(function() {
 						$( "#tc-link-key-info" ).hide();
 					}
 				}
+				//else
+				//	alert(response['errormsg']);
 			},
 			error : function(response) {
 				//alert(response.errormsg);
@@ -111,6 +113,8 @@ $(document).ready(function() {
 								clearTimeout(requestAllKeysTimer);
 								requestAllKeysTimer = setTimeout(function () { requestAllKeys(); }, 750);
 							}
+							//else
+							//	alert(response['errormsg']);
 						},
 						error : function(response) {
 							//alert(response.errormsg);
@@ -155,6 +159,8 @@ $(document).ready(function() {
 								clearTimeout(requestAllKeysTimer);
 								requestAllKeysTimer = setTimeout(function () { requestAllKeys(); }, 750);
 							}
+							//else
+							//	alert(response['errormsg']);
 						},
 						error : function(response) {
 							//alert(response.errormsg);

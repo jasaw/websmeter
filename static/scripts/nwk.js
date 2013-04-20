@@ -91,6 +91,8 @@ $(document).ready(function() {
 					// TODO: get network status, and prevent forming or joining network if network is already up
 					// similarly for permit join
 				}
+				//else
+				//	alert(response['errormsg']);
 			},
 			error : function(response) {
 				//alert(response.errormsg);
@@ -119,7 +121,7 @@ $(document).ready(function() {
 				jsonData["panid"] = parseInt(panid.val());
 			var args = JSON.stringify(jsonData);
 			//alert(args);
-			o.dialog( "close" );
+			$( this ).dialog( "close" );
 			$.ajax({
 				type : "POST",
 				url : "/nwk/action",
@@ -131,6 +133,8 @@ $(document).ready(function() {
 						clearTimeout(requestNwkInfoTimer);
 						requestNwkInfoTimer = setTimeout(function () { requestNwkInfo(); }, 2000);
 					}
+					//else
+					//	alert(response['errormsg']);
 				},
 				error : function(response) {
 					//alert(response.errormsg);
@@ -193,6 +197,8 @@ $(document).ready(function() {
 								clearTimeout(requestNwkInfoTimer);
 								requestNwkInfoTimer = setTimeout(function () { requestNwkInfo(); }, 1000);
 							}
+							//else
+							//	alert(response['errormsg']);
 						},
 						error : function(response) {
 							//alert(response.errormsg);
@@ -239,6 +245,8 @@ $(document).ready(function() {
 								clearTimeout(requestNwkInfoTimer);
 								requestNwkInfoTimer = setTimeout(function () { requestNwkInfo(); }, 1000);
 							}
+							//else
+							//	alert(response['errormsg']);
 						},
 						error : function(response) {
 							//alert(response.errormsg);
@@ -279,6 +287,8 @@ $(document).ready(function() {
 							clearTimeout(requestNwkInfoTimer);
 							requestNwkInfoTimer = setTimeout(function () { requestNwkInfo(); }, 2000);
 						}
+						//else
+						//	alert(response['errormsg']);
 					},
 					error : function(response) {
 						//alert(response.errormsg);
