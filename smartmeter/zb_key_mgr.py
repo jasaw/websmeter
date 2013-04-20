@@ -95,15 +95,14 @@ class ZbKeyMgr(object):
     #test-harness key-update now
     #cbke start <nodeid> <dst endpoint>
 
-    # TODO: look for successful KE and refresh cache
+    # Key Establish Success: Link key verified (6)
 
     def __init__(self, max_num_keys=6):
         self.logger = logger.Logger('zbkeymgr')
         self.max_num_keys = max_num_keys
         self.min_rsp_lines = 9
         self.last_req = 0
-        self.cache_duration = 60*5
-        # FIXME: refresh_cache not used yet
+        self.cache_duration = 60*15
         self.refresh_cache = False
         self.ready = False
         self.nwkkey = ZbNwkKey()
@@ -111,12 +110,19 @@ class ZbKeyMgr(object):
         self.link_keys = []
         self.link_keys_to_add = []
         self.lock = threading.Lock()
+        self.mrsp = []
         start_tag = r'EMBER_SECURITY_LEVEL: .*'
         entries_tag = r'[0-9]*/([0-9]*) entries used.'
-        self.mrsp = multiline_rsp.MultilineResponseBuilder(start_tag, entries_tag, self.min_rsp_lines + self.max_num_keys, self._extract_multiline_response)
+        key_change_tag = r'Key Establish Success: Link key verified \(6\)'
+        self.link_key_mrsp = multiline_rsp.MultilineResponseBuilder(start_tag, entries_tag, self.min_rsp_lines + self.max_num_keys, self._extract_multiline_response)
+        self.mrsp.append(self.link_key_mrsp)
+        self.mrsp.append(multiline_rsp.MultilineResponseBuilder(key_change_tag, None, 1, self._force_cache_refresh))
 
     def _expire_cache(self):
         self.last_req = 0
+
+    def _force_cache_refresh(self):
+        self.refresh_cache = True
 
     def _find_link_key_in_list(self, key_list, mac):
         for k in key_list:
@@ -254,7 +260,7 @@ class ZbKeyMgr(object):
 
     def _extract_entries_used(self, match):
         self.max_num_keys = int(match.group(1))
-        self.mrsp.max_num_line = self.min_rsp_lines + self.max_num_keys
+        self.link_key_mrsp.max_num_line = self.min_rsp_lines + self.max_num_keys
         self.ready = True
         #self.logger.log('found max entries %d', self.max_num_keys)
 
@@ -288,7 +294,12 @@ class ZbKeyMgr(object):
         self.lock.release()
 
     def handle_rsp(self, rsp_line):
-        return self.mrsp.process_one_response_line(rsp_line)
+        accepted = False
+        for m in self.mrsp:
+            accepted = m.process_one_response_line(rsp_line)
+            if accepted:
+                break
+        return accepted
 
     def process(self):
         cmds = []
