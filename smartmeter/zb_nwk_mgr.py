@@ -256,10 +256,8 @@ class ZbNwkMgr(object):
 
     def refresh_network_info(self):
         now = time.time()
-        self.lock.acquire()
         if now - self.last_req > self.cache_duration:
             self.need_nwk_info = True
-        self.lock.release()
 
     def handle_rsp(self, rsp_line):
         accepted = False
