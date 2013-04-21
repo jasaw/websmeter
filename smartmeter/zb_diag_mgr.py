@@ -6,7 +6,6 @@ import time
 import string
 import threading
 import re
-import random
 
 import logger
 import multiline_rsp
@@ -159,7 +158,8 @@ class ZbDiagMgr(object):
         nodetype = match.group(2).strip()
         nodeid = int(match.group(3),16)
         macaddr = match.group(4).upper()
-        self.child_table.append(ChildTableEntry(index, nodetype, nodeid, macaddr))
+        if len(macaddr) == 16 and all(c in string.hexdigits for c in macaddr):
+            self.child_table.append(ChildTableEntry(index, nodetype, nodeid, macaddr))
 
     def _extract_child_table(self, start_match, end_match, rsp):
         #0: Sleepy  0x0718 (>)D103C0B7DDA60003
@@ -182,7 +182,8 @@ class ZbDiagMgr(object):
         num_out = int(match.group(5))
         age = int(match.group(6))
         macaddr = match.group(7).upper()
-        self.neighbour_table.append(NeighbourTableEntry(index, nodeid, macaddr, lqi, num_in, num_out, age))
+        if len(macaddr) == 16 and all(c in string.hexdigits for c in macaddr):
+            self.neighbour_table.append(NeighbourTableEntry(index, nodeid, macaddr, lqi, num_in, num_out, age))
 
     def _extract_neighbour_table(self, start_match, end_match, rsp):
         #0: 0x0D80 255  1   1    3    (>)8CEEC60101000054
