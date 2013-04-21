@@ -387,7 +387,7 @@ $(document).ready(function() {
 	});
 	$( "#send-drlc-event-form" ).dialog({
 		autoOpen: false,
-		height: 260,
+		height: 250,
 		width: 300,
 		modal: true,
 		buttons: {
