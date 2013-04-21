@@ -97,7 +97,7 @@ class ZbKeyMgr(object):
 
     # Key Establish Success: Link key verified (6)
 
-    def __init__(self, max_num_keys=6):
+    def __init__(self, max_num_keys=16):
         self.logger = logger.Logger('zbkeymgr')
         self.max_num_keys = max_num_keys
         self.min_rsp_lines = 9
@@ -112,9 +112,9 @@ class ZbKeyMgr(object):
         self.lock = threading.Lock()
         self.mrsp = []
         start_tag = r'EMBER_SECURITY_LEVEL: .*'
-        entries_tag = r'[0-9]*/([0-9]*) entries used.'
+        entries_tag = r'[0-9]+/([0-9]+) entries used.'
         key_change_tag = r'Key Establish Success: Link key verified \(6\)'
-        self.link_key_mrsp = multiline_rsp.MultilineResponseBuilder(start_tag, entries_tag, self.min_rsp_lines + self.max_num_keys, self._extract_multiline_response)
+        self.link_key_mrsp = multiline_rsp.MultilineResponseBuilder(start_tag, entries_tag, self.min_rsp_lines + self.max_num_keys, self._extract_security_keys)
         self.mrsp.append(self.link_key_mrsp)
         self.mrsp.append(multiline_rsp.MultilineResponseBuilder(key_change_tag, None, 1, self._force_cache_refresh))
 
@@ -264,9 +264,9 @@ class ZbKeyMgr(object):
         self.ready = True
         #self.logger.log('found max entries %d', self.max_num_keys)
 
-    def _extract_multiline_response(self, start_match, end_match, rsp):
-        nwk_key_seq_tag = r'NWK Key seq num: (0x[a-fA-F0-9]*)'
-        nwk_key_tag = r'NWK Key: ([a-fA-F0-9 ]*)'
+    def _extract_security_keys(self, start_match, end_match, rsp):
+        nwk_key_seq_tag = r'NWK Key seq num: (0x[a-fA-F0-9]+)'
+        nwk_key_tag = r'NWK Key: ([a-fA-F0-9 ]+)'
         link_key_tag = r'([0-9 \-]*)\(>\)([a-fA-F0-9]{16}).*([y|n])([a-fA-F0-9 ]*)'
         tags = [(nwk_key_seq_tag, self._extract_nwk_key_seq),
                 (nwk_key_tag,     self._extract_nwk_key),
@@ -274,7 +274,8 @@ class ZbKeyMgr(object):
         tag_index = 0
         t, f = tags[tag_index]
         self.lock.acquire()
-        self._extract_entries_used(end_match)
+        if end_match is not None:
+            self._extract_entries_used(end_match)
         self.tc_link_key = None
         self.link_keys = []
         for line in rsp:

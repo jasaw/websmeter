@@ -27,6 +27,9 @@ class ZbNwkInfo(object):
         self.radio_power = radio_power
         self.lock = threading.Lock()
 
+    def __repr__(self):
+        return repr((self.node_id, self.end_point, self.pan_id, self.expan_id, self.radio_channel, self.radio_power))
+
     def get_nwk_info(self):
         """Return network info in dictionary format"""
         nwkinfo = {}
@@ -145,9 +148,9 @@ class ZbNwkMgr(object):
         #node [(>)8CEEC60101000050] chan [18] pwr [3]
         #panID [0xF00D] nodeID [0xFFFE] xpan [0x(>)A77D2583AB2EFA28]
         #ep 1 [endpoint enabled, device enabled] nwk [0] profile [0x0109] devId [0x0500] ver [0x00]
-        node_tag = r'node \[\(>\)([a-fA-F0-9]{16})\] chan \[([0-9]*)\] pwr \[([0-9])\]'
-        nwk_tag = r'panID \[(0x[a-fA-F0-9]*)\] nodeID \[(0x[a-fA-F0-9]*)\] xpan \[0x\(>\)([a-fA-F0-9]{16})\]'
-        ep_tag = r'^ep ([0-9]) .*'
+        node_tag = r'node \[\(>\)([a-fA-F0-9]{16})\] chan \[([0-9]+)\] pwr \[([0-9])\]'
+        nwk_tag = r'panID \[(0x[a-fA-F0-9]+)\] nodeID \[(0x[a-fA-F0-9]+)\] xpan \[0x\(>\)([a-fA-F0-9]{16})\]'
+        ep_tag = r'^ep ([0-9]+) .*'
         tags = [(node_tag, self._extract_matched_node_info),
                 (nwk_tag,  self._extract_matched_nwk_info),
                 (ep_tag,   self._extract_matched_endpoint_info),]

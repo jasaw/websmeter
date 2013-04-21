@@ -312,7 +312,7 @@ class ZbDrlcMgr(object):
         self.pending_cmd = []
         self.mrsp = []
         event_start_tag = r'= LCE ([0-9]*) ='
-        event_table_size_tag = r'Table size: ([0-9]*)'
+        event_table_size_tag = r'Table size: ([0-9]+)'
         self.mrsp.append(multiline_rsp.MultilineResponseBuilder(event_start_tag, None, 20, self._extract_event_info))
         self.mrsp.append(multiline_rsp.MultilineResponseBuilder(event_table_size_tag, None, 1, self._extract_max_num_events))
 
@@ -410,20 +410,20 @@ class ZbDrlcMgr(object):
         # sr: 0x0000
         # er: 0x0000
         # oc: 0x00
-        eid_tag = r'eid: (0x[a-fA-F0-9]*)'
-        src_tag = r'src: (0x[a-fA-F0-9]*)'
-        dev_tag = r'dev: (0x[a-fA-F0-9]*)'
-        ueg_tag = r'ueg: (0x[a-fA-F0-9]*)'
-        start_tag = r' st: (0x[a-fA-F0-9]*)'
-        duration_tag = r'dur: (0x[a-fA-F0-9]*)'
-        criticality_tag = r' cl: (0x[a-fA-F0-9]*)'
-        cto_tag = r'cto: (0x[a-fA-F0-9]*)'
-        hto_tag = r'hto: (0x[a-fA-F0-9]*)'
-        cts_tag = r'cts: (0x[a-fA-F0-9]*)'
-        hts_tag = r'hts: (0x[a-fA-F0-9]*)'
-        avgload_tag = r'alp: (0x[a-fA-F0-9]*)'
-        dutycycle_tag = r' dc: (0x[a-fA-F0-9]*)'
-        ectrl_tag = r' ev: (0x[a-fA-F0-9]*)'
+        eid_tag = r'eid: (0x[a-fA-F0-9]+)'
+        src_tag = r'src: (0x[a-fA-F0-9]+)'
+        dev_tag = r'dev: (0x[a-fA-F0-9]+)'
+        ueg_tag = r'ueg: (0x[a-fA-F0-9]+)'
+        start_tag = r' st: (0x[a-fA-F0-9]+)'
+        duration_tag = r'dur: (0x[a-fA-F0-9]+)'
+        criticality_tag = r' cl: (0x[a-fA-F0-9]+)'
+        cto_tag = r'cto: (0x[a-fA-F0-9]+)'
+        hto_tag = r'hto: (0x[a-fA-F0-9]+)'
+        cts_tag = r'cts: (0x[a-fA-F0-9]+)'
+        hts_tag = r'hts: (0x[a-fA-F0-9]+)'
+        avgload_tag = r'alp: (0x[a-fA-F0-9]+)'
+        dutycycle_tag = r' dc: (0x[a-fA-F0-9]+)'
+        ectrl_tag = r' ev: (0x[a-fA-F0-9]+)'
         tags = [(eid_tag,           self._extract_matched_event_id),
                 (src_tag,           self._extract_matched_event_source),
                 (dev_tag,           self._extract_matched_device_class),
