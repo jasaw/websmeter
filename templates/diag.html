@@ -1,0 +1,75 @@
+$def with ()
+$var jsfiles: diag.js
+$var cssfiles:
+
+<div id="child-table-info" class="ui-widget">
+	<div>
+		<h1>Child Table:</h1>
+		<table id="child-table" class="ui-widget ui-widget-content">
+			<thead>
+				<tr class="ui-widget-header ">
+					<th>Node ID</th>
+					<th>Node Type</th>
+					<th>MAC Address</th>
+				</tr>
+			</thead>
+			<tbody>
+			</tbody>
+		</table>
+	</div>
+	<div>
+		<label for="max-num-child-entries">Maximum number of entries: </label>
+		<label id="max-num-child-entries"></label>
+	</div>
+</div>
+
+<div id="neighbour-table-info" class="ui-widget">
+	<div>
+		<h1>Neighbour Table:</h1>
+		<table id="neighbour-table" class="ui-widget ui-widget-content">
+			<thead>
+				<tr class="ui-widget-header ">
+					<th>Node ID</th>
+					<th>MAC Address</th>
+					<th>LQI</th>
+					<th>In</th>
+					<th>Out</th>
+					<th>Age</th>
+				</tr>
+			</thead>
+			<tbody>
+			</tbody>
+		</table>
+	</div>
+	<div>
+		<label for="max-num-neighbour-entries">Maximum number of entries: </label>
+		<label id="max-num-neighbour-entries"></label>
+	</div>
+</div>
+
+<div id="route-table-info" class="ui-widget">
+	<div>
+		<h1>Route Table:</h1>
+		<table id="route-table" class="ui-widget ui-widget-content">
+			<thead>
+				<tr class="ui-widget-header ">
+					<th>Node ID</th>
+					<th>Next</th>
+					<th>Age</th>
+					<th>Conc</th>
+					<th>Status</th>
+				</tr>
+			</thead>
+			<tbody>
+			</tbody>
+		</table>
+	</div>
+	<div>
+		<label for="max-num-route-entries">Maximum number of entries: </label>
+		<label id="max-num-route-entries"></label>
+	</div>
+</div>
+
+<div>
+	<button id="refresh-all-tables">Refresh</button>
+</div>

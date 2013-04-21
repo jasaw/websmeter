@@ -13,6 +13,7 @@ import error
 import zb_key_mgr
 import zb_nwk_mgr
 import zb_drlc_mgr
+import zb_diag_mgr
 
 
 class Error(error.Generic):
@@ -41,12 +42,15 @@ class SmartMeterCtrl(object):
         self.key_mgr = zb_key_mgr.ZbKeyMgr()
         self.nwk_mgr = zb_nwk_mgr.ZbNwkMgr()
         self.drlc_mgr = zb_drlc_mgr.ZbDrlcMgr()
+        self.diag_mgr = zb_diag_mgr.ZbDiagMgr()
         self.rsp_listeners.append(self.key_mgr)
         self.rsp_listeners.append(self.nwk_mgr)
         self.rsp_listeners.append(self.drlc_mgr)
+        self.rsp_listeners.append(self.diag_mgr)
         self.cmd_generators.append(self.key_mgr)
         self.cmd_generators.append(self.nwk_mgr)
         self.cmd_generators.append(self.drlc_mgr)
+        self.cmd_generators.append(self.diag_mgr)
 
     def __del__(self):
         self.terminate = True

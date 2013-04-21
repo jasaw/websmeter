@@ -5,6 +5,7 @@ import os
 
 from smartmeter import smartmeter
 from smartmeter import logger
+import diag
 import drlc
 import keys
 import nwk
@@ -15,6 +16,7 @@ os.chdir(web_root)
 
 urls = (
     "/(.*)/", "redirect",
+    "/diag", diag.handler,
     "/drlc", drlc.handler,
     "/keys", keys.handler,
     "/nwk", nwk.handler,
