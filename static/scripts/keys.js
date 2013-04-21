@@ -32,7 +32,7 @@ $(document).ready(function() {
 	function requestAllKeys() {
 		$.ajax({
 			type : "GET",
-			url : "/keys/getkeys",
+			url : "/keys/action",
 			contentType : "application/json; charset=utf-8",
 			dataType : "json",
 			success : function(response) {
@@ -97,6 +97,7 @@ $(document).ready(function() {
 				bValid = bValid && checkRegexp( addpreconfkey, /^([0-9a-fA-F])+$/, "Link key must be in hex." );
 				if ( bValid ) {
 					var jsonData = {};
+					jsonData["action"] = "addlinkkey";
 					jsonData["mac"] = addmacaddr.val();
 					jsonData["key"] = addpreconfkey.val();
 					var args = JSON.stringify(jsonData);
@@ -104,7 +105,7 @@ $(document).ready(function() {
 					$( this ).dialog( "close" );
 					$.ajax({
 						type : "POST",
-						url : "/keys/addkey",
+						url : "/keys/action",
 						data : args,
 						contentType : "application/json; charset=utf-8",
 						dataType : "json",
@@ -144,13 +145,14 @@ $(document).ready(function() {
 				bValid = bValid && checkRegexp( rmmacaddr, /^([0-9a-fA-F])+$/, "MAC address must be in hex." );
 				if ( bValid ) {
 					var jsonData = {};
+					jsonData["action"] = "rmlinkkey";
 					jsonData["mac"] = rmmacaddr.val();
 					var args = JSON.stringify(jsonData);
 					//alert(args);
 					$( this ).dialog( "close" );
 					$.ajax({
 						type : "POST",
-						url : "/keys/rmkey",
+						url : "/keys/action",
 						data : args,
 						contentType : "application/json; charset=utf-8",
 						dataType : "json",
@@ -186,6 +188,34 @@ $(document).ready(function() {
 	.button()
 	.click(function() {
 		$( "#rm-link-key-form" ).dialog( "open" );
+	});
+	$( "#change-network-key" )
+	.button()
+	.click(function() {
+		// Broadcast new network key now
+		var jsonData = {};
+		jsonData["action"] = "updatenwkkey";
+		var args = JSON.stringify(jsonData);
+		//alert(args);
+		$.ajax({
+			type : "POST",
+			url : "/keys/action",
+			data : args,
+			contentType : "application/json; charset=utf-8",
+			dataType : "json",
+			success : function(response) {
+				if (response['status'] == 0) {
+					clearTimeout(requestAllKeysTimer);
+					requestAllKeysTimer = setTimeout(function () { requestAllKeys(); }, 750);
+				}
+				//else
+				//	alert(response['errormsg']);
+			},
+			error : function(response) {
+				//alert(response.errormsg);
+				alert("Unable to contact server. Please try again.");
+			}
+		});
 	});
 	$( "#refresh-link-keys" )
 	.button()

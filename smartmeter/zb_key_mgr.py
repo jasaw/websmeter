@@ -105,6 +105,7 @@ class ZbKeyMgr(object):
         self.cache_duration = 60*15
         self.refresh_cache = False
         self.ready = False
+        self.pending_cmd = []
         self.nwkkey = ZbNwkKey()
         self.tc_link_key = None
         self.link_keys = []
@@ -217,8 +218,14 @@ class ZbKeyMgr(object):
             self.lock.release()
         return False
 
-    # TODO: support switch network key
-    #test-harness key-update now
+    def update_nwk_key(self):
+        # switch network key
+        if len(self.pending_cmd) < 5:
+            self.lock.acquire()
+            self.pending_cmd.append('test-harness key-update now\n')
+            self.lock.release()
+            return True
+        return False
 
     def _mac_link_key_is_valid(self, linkkey):
         return linkkey != INVALID_LINK_KEY
@@ -314,6 +321,9 @@ class ZbKeyMgr(object):
                         self.link_keys.append(k)
                 self.link_keys.sort(key=lambda k: k.index)
                 self.link_keys_to_add = []
+            if len(self.pending_cmd) > 0:
+                cmds.extend(self.pending_cmd)
+                self.pending_cmd = []
             self.lock.release()
 
         now = time.time()
