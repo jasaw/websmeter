@@ -32,19 +32,20 @@ class MultilineResponseBuilder(object):
             self.end_match = None
             self.expect_more_lines = True
             accepted = True
-        elif self.end_tag is not None:
-            match = re.search(self.end_tag, rsp_line)
-            if match:
-                #self.logger.log('found end')
+        elif self.expect_more_lines:
+            if self.end_tag is not None:
+                match = re.search(self.end_tag, rsp_line)
+                if match:
+                    #self.logger.log('found end')
+                    self.lines_so_far.append(rsp_line)
+                    self.end_match = match
+                    accepted = True
+                    self.response_handler(self.start_match, self.end_match, self.lines_so_far)
+                    self._reset_state()
+            if not accepted:
+                #self.logger.log('append')
                 self.lines_so_far.append(rsp_line)
-                self.end_match = match
                 accepted = True
-                self.response_handler(self.start_match, self.end_match, self.lines_so_far)
-                self._reset_state()
-        if not accepted and self.expect_more_lines:
-            #self.logger.log('append')
-            self.lines_so_far.append(rsp_line)
-            accepted = True
         if len(self.lines_so_far) >= self.max_num_lines:
             #self.logger.log('warning: too many response lines')
             self.response_handler(self.start_match, self.end_match, self.lines_so_far)
