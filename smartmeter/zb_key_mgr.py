@@ -117,13 +117,16 @@ class ZbKeyMgr(object):
         key_change_tag = r'Key Establish Success: Link key verified \(6\)'
         self.link_key_mrsp = multiline_rsp.MultilineResponseBuilder(start_tag, entries_tag, self.min_rsp_lines + self.max_num_keys, self._extract_security_keys)
         self.mrsp.append(self.link_key_mrsp)
-        self.mrsp.append(multiline_rsp.MultilineResponseBuilder(key_change_tag, None, 1, self._force_cache_refresh))
+        self.mrsp.append(multiline_rsp.MultilineResponseBuilder(key_change_tag, None, 1, self._mrsp_force_cache_refresh))
 
     def _expire_cache(self):
         self.last_req = 0
 
     def _force_cache_refresh(self):
         self.refresh_cache = True
+
+    def _mrsp_force_cache_refresh(self, start_match, end_match, rsp):
+        self._force_cache_refresh()
 
     def _find_link_key_in_list(self, key_list, mac):
         for k in key_list:
