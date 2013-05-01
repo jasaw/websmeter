@@ -331,6 +331,7 @@ class ZbKeyMgr(object):
 
         now = time.time()
         if self.refresh_cache or now - self.last_req > self.cache_duration:
+            self.refresh_cache = False
             self.last_req = now
             cmds.append('keys print\n')
         return cmds
