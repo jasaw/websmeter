@@ -115,9 +115,11 @@ class ZbKeyMgr(object):
         start_tag = r'EMBER_SECURITY_LEVEL: .*'
         entries_tag = r'[0-9]+/([0-9]+) entries used.'
         key_change_tag = r'Key Establish Success: Link key verified \(6\)'
+        partner_key_tag = r'Successful partner link key for node '
         self.link_key_mrsp = multiline_rsp.MultilineResponseBuilder(start_tag, entries_tag, self.min_rsp_lines + self.max_num_keys, self._extract_security_keys)
         self.mrsp.append(self.link_key_mrsp)
         self.mrsp.append(multiline_rsp.MultilineResponseBuilder(key_change_tag, None, 1, self._mrsp_force_cache_refresh))
+        self.mrsp.append(multiline_rsp.MultilineResponseBuilder(partner_key_tag, None, 1, self._mrsp_force_cache_refresh))
 
     def _expire_cache(self):
         self.last_req = 0
