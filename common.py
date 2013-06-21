@@ -19,5 +19,5 @@ def getJsonArg(sArg, sDefault=""):
                 return sDefault
         else:
             return sDefault
-    except ValueError:
-        raise Exception("getJsonArg - no JSON arguments to decode. This method required a POST with JSON arguments.")
+    except (TypeError, ValueError), e:
+        raise Exception("getJsonArg - no JSON arguments to decode: %s" % str(e))
