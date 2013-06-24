@@ -185,7 +185,7 @@ $(document).ready(function() {
 	}
 	$( "#set-msg-form" ).dialog({
 		autoOpen: false,
-		height: 500,
+		height: 530,
 		width: 550,
 		modal: true,
 		buttons: {
@@ -223,7 +223,7 @@ $(document).ready(function() {
 					setconfirmation_value = setconfirmation_value | parseInt($(this).val());
 				});
 				// message string
-				bValid = bValid && checkLengthRange( set_msg_form_tips, setmsgstring, "message", 1, 254 );
+				bValid = bValid && checkLengthRange( set_msg_form_tips, setmsgstring, "message", 1, 170 );
 				if ( bValid ) {
 					var jsonData = {};
 					jsonData["action"] = "set";
@@ -268,7 +268,7 @@ $(document).ready(function() {
 	});
 	$( "#send-msg-form" ).dialog({
 		autoOpen: false,
-		height: 200,
+		height: 220,
 		width: 300,
 		modal: true,
 		buttons: {
@@ -334,7 +334,7 @@ $(document).ready(function() {
 	});
 	$( "#cancel-msg-form" ).dialog({
 		autoOpen: false,
-		height: 200,
+		height: 220,
 		width: 300,
 		modal: true,
 		buttons: {
