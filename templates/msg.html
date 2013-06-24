@@ -1,0 +1,152 @@
+$def with ()
+$var jsfiles: msg.js
+$var cssfiles:
+
+<div id="set-msg-form" title="Set Text Message">
+	<p id="set-msg-form-tips"></p>
+	<form>
+		<fieldset>
+			<div>
+				<label>Transmission</label><br>
+				<table>
+					<tr>
+						<td><input type="radio" name="settx" id="settx_normal" value=0>Normal</td>
+					</tr>
+					<tr>
+						<td><input type="radio" name="settx" id="settx_interpan" value=2>Interpan</td>
+					</tr>
+					<tr>
+						<td><input type="radio" name="settx" id="settx_both" value=1>Both</td>
+					</tr>
+				</table>
+			</div>
+			<div>
+				<label>Importance</label><br>
+				<table>
+					<tr>
+						<td><input type="radio" name="setimportance" id="setimportance_low" value=0>Low</td>
+					</tr>
+					<tr>
+						<td><input type="radio" name="setimportance" id="setimportance_medium" value=4>Medium</td>
+					</tr>
+					<tr>
+						<td><input type="radio" name="setimportance" id="setimportance_high" value=8>High</td>
+					</tr>
+					<tr>
+						<td><input type="radio" name="setimportance" id="setimportance_critical" value=12>Critical</td>
+					</tr>
+				</table>
+			</div>
+			<div>
+				<label>Confirmation</label><br>
+				<table>
+					<tr>
+						<td><input type="checkbox" name="setconfirmation" id="setctrl_confirmation" value=128>Require confirmation</td>
+					</tr>
+				</table>
+			</div>
+			<div>
+				<label for="setstartdate">Start Date</label>
+				<input type="text" name="setstartdate" id="setstartdate" value="" class="text ui-widget-content ui-corner-all" title="In local time" />
+				<label for="setstarttime">Time</label>
+				<input type="text" name="setstarttime" id="setstarttime" value="" class="text ui-widget-content ui-corner-all" title="In local time" />
+			</div>
+			<div>
+				<label for="setduration">Duration in minutes</label>
+				<input type="text" name="setduration" id="setduration" value="" class="text ui-widget-content ui-corner-all" title="In minutes between 1 and 0xFFFF. Set to 0 for infinite duration." />
+			</div>
+			<div>
+				<label for="setmsgstring">Message</label>
+				<input type="text" name="setmsgstring" id="setmsgstring" value="" class="text ui-widget-content ui-corner-all" title="Max length 254 bytes." style="width:500px;" />
+			</div>
+		</fieldset>
+	</form>
+</div>
+
+<div id="send-msg-form" title="Send Message">
+	<p id="send-msg-form-tips"></p>
+	<form>
+		<fieldset>
+			<div>
+				<label for="sendnodeid">Node ID</label>
+				<input type="text" name="sendnodeid" id="sendnodeid" value="" class="text ui-widget-content ui-corner-all" title="Enter multiple IDs by comma separating them." />
+			</div>
+			<div>
+				<label for="senddstep">End Point</label>
+				<input type="text" name="senddstep" id="senddstep" value="" class="text ui-widget-content ui-corner-all" title="Enter corresponding end points by comma separating them." />
+			</div>
+		</fieldset>
+	</form>
+</div>
+
+<div id="cancel-msg-form" title="Cancel Message">
+	<p id="cancel-msg-form-tips"></p>
+	<form>
+		<fieldset>
+			<div>
+				<label for="cancelnodeid">Node ID</label>
+				<input type="text" name="cancelnodeid" id="cancelnodeid" value="" class="text ui-widget-content ui-corner-all" title="Enter multiple IDs by comma separating them." />
+			</div>
+			<div>
+				<label for="canceldstep">End Point</label>
+				<input type="text" name="canceldstep" id="canceldstep" value="" class="text ui-widget-content ui-corner-all" title="Enter corresponding end points by comma separating them." />
+			</div>
+		</fieldset>
+	</form>
+</div>
+
+<div id="current-msg" class="ui-widget">
+	<div>
+		<h1>Message buffer:</h1>
+	</div>
+	<div>
+		<label for="current-msg-valid">Valid: </label>
+		<label id="current-msg-valid"></label>
+	</div>
+	<div>
+		<label for="current-msg-active">Active: </label>
+		<label id="current-msg-active"></label>
+	</div>
+	<div>
+		<label for="current-msg-id">ID: </label>
+		<label id="current-msg-id"></label>
+	</div>
+	<div>
+		<label for="current-msg-tx">Transmission: </label>
+		<label id="current-msg-tx"></label>
+	</div>
+	<div>
+		<label for="current-msg-importance">Importance: </label>
+		<label id="current-msg-importance"></label>
+	</div>
+	<div>
+		<label for="current-msg-confirmation">Confirmation: </label>
+		<label id="current-msg-confirmation"></label>
+	</div>
+	<div>
+		<label for="current-msg-start">Start Time (local): </label>
+		<label id="current-msg-start"></label>
+	</div>
+	<div>
+		<label for="current-msg-duration">Duration: </label>
+		<label id="current-msg-duration"></label>
+	</div>
+	<div>
+		<label for="current-msg-message">Message: </label>
+		<label id="current-msg-message"></label>
+	</div>
+</div>
+
+<div>
+	<button id="set-msg">Set message buffer</button>
+	<button id="clear-msg">Clear message buffer</button>
+</div>
+
+<div>
+	<button id="send-msg">Send message</button>
+	<button id="cancel-msg">Cancel message</button>
+</div>
+
+<div>
+	<button id="refresh-msg">Refresh</button>
+</div>

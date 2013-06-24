@@ -253,16 +253,18 @@ class ZbMessageMgr(object):
                 if tag_index + 1 < len(tags):
                     tag_index = tag_index + 1
                     t, f = tags[tag_index]
-        self.logger.log('%s', the_msg)
+        #self.logger.log('%s', the_msg)
         if the_msg.is_valid():
             self.message = the_msg
+            self.ready = True
         self.lock.release()
 
     def get_message(self):
         """Return DRLC events in [dictionary] format"""
-        return self.message
+        return self.message.get_message()
 
     def set_message(self, **kwargs):
+        status = False
         if self.ready:
             self.lock.acquire()
             try:
@@ -337,7 +339,7 @@ class ZbMessageMgr(object):
         if self.message_to_add is not None:
             cmds.append('plugin messaging-server message "%s"\n' % self.message_to_add.message_string)
             cmds.append('plugin messaging-server id 0x%x\n' % self.message_to_add.msg_id)
-            cmds.append('plugin messaging-server time 0x%x\n' % self.message_to_add.start_time)
+            cmds.append('plugin messaging-server time 0x%x 0x%x\n' % (self.message_to_add.start_time, self.message_to_add.duration))
             cmds.append('plugin messaging-server transmission %s\n' % self.message_to_add.get_transmission_mode_string())
             cmds.append('plugin messaging-server importance %s\n' % self.message_to_add.get_priority_string())
             cmds.append('plugin messaging-server confirm %s\n' % self.message_to_add.get_confirmation_string())

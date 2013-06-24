@@ -9,6 +9,7 @@ import diag
 import drlc
 import keys
 import nwk
+import msg
 
 # to avoid any path issues, "cd" to the web root.
 web_root = os.path.abspath(os.path.dirname(__file__))
@@ -20,6 +21,7 @@ urls = (
     "/drlc", drlc.handler,
     "/keys", keys.handler,
     "/nwk", nwk.handler,
+    "/msg", msg.handler,
     "/", "index"
 )
 
