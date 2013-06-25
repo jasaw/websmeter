@@ -337,7 +337,7 @@ class ZbMessageMgr(object):
             self._expire_cache()
             self.refresh_message_cache()
         if self.message_to_add is not None:
-            cmds.append('plugin messaging-server message "%s"\n' % self.message_to_add.message_string)
+            cmds.append('plugin messaging-server message "%s"\n' % self.message_to_add.message_string.replace('"','\\"'))
             cmds.append('plugin messaging-server id 0x%x\n' % self.message_to_add.msg_id)
             cmds.append('plugin messaging-server time 0x%x 0x%x\n' % (self.message_to_add.start_time, self.message_to_add.duration))
             cmds.append('plugin messaging-server transmission %s\n' % self.message_to_add.get_transmission_mode_string())

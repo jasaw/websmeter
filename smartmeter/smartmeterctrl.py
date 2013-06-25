@@ -33,10 +33,11 @@ class ProcError(Error):
 
 class SmartMeterCtrl(object):
 
-    def __init__(self, bin_path, device_path):
+    def __init__(self, bin_path, device_path, debug_mode=True):
         self.logger = logger.Logger('smctrl')
         self.bin_path = bin_path
         self.device_path = device_path
+        self.debug_mode = debug_mode
         self.sm_proc = None
         self.commands = [];
         self.rsp_listeners = [];
@@ -79,8 +80,8 @@ class SmartMeterCtrl(object):
         rsp = self.sm_stdout_lines[:-1]
         self.sm_stdout_lines = self.sm_stdout_lines[-1:]
         for line in rsp:
-            # DEBUG: remove this print
-            self.logger.log('sm: %s', line)
+            if self.debug_mode:
+                self.logger.log('sm: %s', line)
             for listener in self.rsp_listeners:
                 if listener.handle_rsp(line):
                     break
@@ -158,8 +159,8 @@ class SmartMeterCtrl(object):
     def stop(self):
         self.terminate = True
         if self.sm_proc is not None:
-            # DEBUG: remove this print
-            self.logger.log('sm: %s', self.sm_stdout_lines[-1])
+            if self.debug_mode:
+                self.logger.log('sm: %s', self.sm_stdout_lines[-1])
             if len(self.sm_stderr_lines[-1]) > 0:
                 self.logger.log('sm err: %s', self.sm_stderr_lines[-1])
 

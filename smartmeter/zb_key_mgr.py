@@ -208,16 +208,21 @@ class ZbKeyMgr(object):
             self.lock.acquire()
             k = self._find_link_key_in_list(self.link_keys, mac)
             if k is not None:
-                # there is no way to remove a link key, so just overwrite it with rubbish
-                k.set_link_key(linkkey=INVALID_LINK_KEY, used=False)
-                self.link_keys_to_add.append(k)
+                # Note: "option rmlink" command does not come with stock ember stack
+                self.pending_cmd.append('option rmlink %d\n' % k.index)
+                ## there is no way to remove a link key, so just overwrite it with rubbish
+                #k.set_link_key(linkkey=INVALID_LINK_KEY, used=False)
+                #self.link_keys_to_add.append(k)
                 self.link_keys.remove(k)
                 self.lock.release()
                 return True
             k = self._find_link_key_in_list(self.link_keys_to_add, mac)
             if k is not None:
-                # there is no way to remove a link key, so just overwrite it with rubbish
-                k.set_link_key(linkkey=INVALID_LINK_KEY, used=False)
+                # Note: If "option rmlink" command is not supported, uncomment
+                #       the lines below which sets the link to rubbish value.
+                self.link_keys_to_add.remove(k)
+                ## there is no way to remove a link key, so just overwrite it with rubbish
+                #k.set_link_key(linkkey=INVALID_LINK_KEY, used=False)
                 self.lock.release()
                 return True
             self.lock.release()

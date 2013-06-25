@@ -10,20 +10,22 @@ import smartmeterctrl
 
 class SmartMeter(threading.Thread):
 
-    def __init__(self, bin_path, device_path):
+    def __init__(self, bin_path, device_path, debug_mode=True):
         threading.Thread.__init__(self)
+        self.debug_mode = debug_mode
         self.daemon = True
         self.terminate = False
-        self.smctrl = smartmeterctrl.SmartMeterCtrl(bin_path, device_path)
+        self.smctrl = smartmeterctrl.SmartMeterCtrl(bin_path, device_path, debug_mode=debug_mode)
         self.smctrl.start()
 
     def run(self):
-        try:
-            while not self.terminate:
+        while not self.terminate:
+            try:
                 self.smctrl.run_once()
-        except Exception, e:
-            logger.print_trace(e)
-            sys.exit(1)
+            except Exception, e:
+                logger.print_trace(e)
+                if self.debug_mode:
+                    sys.exit(1)
 
     def stop(self):
         self.terminate = True
@@ -32,15 +34,3 @@ class SmartMeter(threading.Thread):
 
 
 smeter = None
-
-
-#if __name__ == "__main__":
-#    smeter = SmartMeter('smartmeter', '/dev/ttyUSB0')
-#    smeter.start()
-#    smeter.join(5)
-#    smeter.smctrl.key_mgr.add_link_key("8CEEC60101000051", "BD29ED98237F6B7B8D02C15D04DE1EDB")
-#    smeter.join(5)
-#    smeter.smctrl.key_mgr.rm_link_key("8CEEC60101000051")
-#    smeter.join(20)
-#    smeter.stop()
-#    smeter.join()

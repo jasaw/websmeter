@@ -37,9 +37,9 @@ class index(object):
         return render.index()
 
 
-def run(bin_path='smartmeter', dev_path='/dev/ttyUSB0', use_syslog=True):
+def run(bin_path='smartmeter', dev_path='/dev/ttyUSB0', use_syslog=True, debug_mode=True):
     logger.Logger.use_syslog = use_syslog
-    smartmeter.smeter = smartmeter.SmartMeter(bin_path, dev_path)
+    smartmeter.smeter = smartmeter.SmartMeter(bin_path, dev_path, debug_mode=debug_mode)
     smartmeter.smeter.start()
     handler.run()
     smartmeter.smeter.stop()

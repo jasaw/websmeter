@@ -502,8 +502,7 @@ class ZbDrlcMgr(object):
             self.lock.acquire()
             e = self._find_event_by_id(self.drlc_events, event_id)
             if e is not None:
-                # TODO: add remove single event to smart meter
-                # command below does not exist yet
+                # Note: command below does not exist on stock ember stack.
                 self.pending_cmd.append('plugin drlc-server clce %d %d\n' % (self.end_point, e.index))
                 self._expire_cache()
                 self.refresh_drlc_table()

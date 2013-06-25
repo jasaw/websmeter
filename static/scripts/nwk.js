@@ -121,7 +121,7 @@ $(document).ready(function() {
 				jsonData["panid"] = parseInt(panid.val());
 			var args = JSON.stringify(jsonData);
 			//alert(args);
-			$( this ).dialog( "close" );
+			o.dialog( "close" );
 			$.ajax({
 				type : "POST",
 				url : "/nwk/action",
