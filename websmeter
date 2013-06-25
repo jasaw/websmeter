@@ -1,0 +1,7 @@
+#!/usr/bin/env python
+
+import index
+
+if __name__ == "__main__":
+    index.run(bin_path='smartmeter', dev_path='/dev/ttyUSB0', use_syslog=True)
+

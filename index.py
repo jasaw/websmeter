@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import web
 import os
 
@@ -39,10 +37,9 @@ class index(object):
         return render.index()
 
 
-if __name__ == "__main__":
-    logger.Logger.use_syslog = True
-    smartmeter.smeter = smartmeter.SmartMeter('smartmeter', '/dev/ttyUSB0')
-    #smartmeter.smeter = smartmeter.SmartMeter('./smartmeter/smartmeter', '/dev/ttyUSB0')
+def run(bin_path='smartmeter', dev_path='/dev/ttyUSB0', use_syslog=True):
+    logger.Logger.use_syslog = use_syslog
+    smartmeter.smeter = smartmeter.SmartMeter(bin_path, dev_path)
     smartmeter.smeter.start()
     handler.run()
     smartmeter.smeter.stop()
