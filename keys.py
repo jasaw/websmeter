@@ -6,6 +6,12 @@ import common
 from smartmeter import smartmeter
 from smartmeter import logger
 
+try:
+    import zigbeehashing
+    zb_install_code_support = True
+except ImportError:
+    zb_install_code_support = False
+
 
 urls = (
     "/action", "action",
@@ -68,12 +74,21 @@ class action(object):
                 mac = common.getJsonArg("mac", "")
                 if not isinstance(mac, str) or len(mac) != 16 or not all(c in string.hexdigits for c in mac):
                     return json.dumps({"status": -1, "errormsg": "Invalid MAC address"})
-                linkkey = common.getJsonArg("key", "")
-                if not isinstance(linkkey, str) or len(linkkey) != 32 or not all(c in string.hexdigits for c in linkkey):
-                    return json.dumps({"status": -1, "errormsg": "Invalid link key"})
-                status = smartmeter.smeter.smctrl.key_mgr.add_link_key(mac, linkkey)
+                pckey = None
+                if zb_install_code_support:
+                    icode = common.getJsonArg("icode", "")
+                    if isinstance(icode, str) and len(icode) >= 8 and all(c in string.hexdigits for c in icode):
+                        try:
+                            pckey = zigbeehashing.installcode_to_preconfkey(icode[:-4], icode[-4:])
+                        except RuntimeError:
+                            return json.dumps({"status": -1, "errormsg": "Invalid install code"})
+                if pckey is None:
+                    pckey = common.getJsonArg("pckey", "")
+                    if not isinstance(pckey, str) or len(pckey) != 32 or not all(c in string.hexdigits for c in pckey):
+                        return json.dumps({"status": -1, "errormsg": "Invalid preconfigured key"})
+                status = smartmeter.smeter.smctrl.key_mgr.add_link_key(mac, pckey)
                 if not status:
-                    return json.dumps({"status": -1, "errormsg": "Failed to add link key"})
+                    return json.dumps({"status": -1, "errormsg": "Failed to add preconfigured key"})
 
             elif action == 'rmlinkkey':
                 mac = common.getJsonArg("mac", "")
@@ -96,5 +111,3 @@ class action(object):
         except Exception, ex:
             logger.print_trace(ex)
             return json.dumps({"status": -1, "errormsg": "Server error"})
-
-

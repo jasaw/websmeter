@@ -3,12 +3,16 @@ $var jsfiles: keys.js
 $var cssfiles:
 
 <div id="add-link-key-form" title="Add/Update link key">
-	<p class="validateTips">All form fields are required.</p>
+	<p class="validateTips">Please fill MAC Address and either Installation Code or Pre-configured Key.</p>
 	<form>
 		<fieldset>
 			<div>
 				<label for="addmacaddr">MAC Address</label>
 				<input type="text" name="addmacaddr" id="addmacaddr" value="" class="text ui-widget-content ui-corner-all" />
+			</div>
+			<div>
+				<label for="addinstallcode">Installation Code</label>
+				<input type="text" name="addinstallcode" id="addinstallcode" value="" class="text ui-widget-content ui-corner-all" />
 			</div>
 			<div>
 				<label for="addpreconfkey">Pre-configured Key</label>

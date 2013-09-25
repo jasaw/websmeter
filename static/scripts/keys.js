@@ -1,8 +1,9 @@
 $(document).ready(function() {
 	var addmacaddr = $( "#addmacaddr" ),
+	addinstallcode = $( "#addinstallcode" ),
 	addpreconfkey = $( "#addpreconfkey" ),
 	rmmacaddr = $( "#rmmacaddr" ),
-	allFields = $( [] ).add( addmacaddr ).add( addpreconfkey ).add( rmmacaddr ),
+	allFields = $( [] ).add( addmacaddr ).add( addinstallcode ).add( addpreconfkey ).add( rmmacaddr ),
 	tips = $( ".validateTips" );
 	var requestAllKeysTimer;
 	function updateTips( t ) {
@@ -28,6 +29,43 @@ $(document).ready(function() {
 		} else {
 			return true;
 		}
+	}
+	function installCodeIsValid( installcode ) {
+		if (installcode.length <= 4)
+			return false;
+		var s = installcode.slice(0,installcode.length-4);
+		var s_crc = installcode.slice(installcode.length-4, installcode.length);
+		if ((s.length > 1) && (!(s.length & 1)) && (s_crc.length == 4)) {
+			var crc = 0xFFFF;
+			var s_crc_value = 0;
+			var i, j, data, ch, cl;
+			for (i = s_crc.length/2-1; i >= 0; i--) {
+				ch = parseInt(s_crc[i*2], 16);
+				cl = parseInt(s_crc[i*2+1], 16);
+				if ((isNaN(ch)) || (isNaN(cl))) {
+					return false;
+				}
+				s_crc_value = (s_crc_value << 8) | (((ch << 4) | cl) & 0xFF);
+			}
+			for (i = 0; i < s.length/2; i++) {
+				ch = parseInt(s[i*2], 16);
+				cl = parseInt(s[i*2+1], 16);
+				if ((isNaN(ch)) || (isNaN(cl))) {
+					return false;
+				}
+				data = ((ch << 4) | cl) & 0xFF;
+				for (j = 0; j < 8; j++, data >>= 1) {
+					if ((crc & 0x0001) ^ (data & 0x0001))
+						crc = ((crc >> 1) ^ 0x8408) & 0xFFFF;
+					else
+						crc >>= 1;
+				}
+			}
+			crc = (~crc) & 0xFFFF;
+			if (crc == s_crc_value)
+				return true;
+		}
+		return false;
 	}
 	function requestAllKeys() {
 		$.ajax({
@@ -84,22 +122,48 @@ $(document).ready(function() {
 	}
 	$( "#add-link-key-form" ).dialog({
 		autoOpen: false,
-		height: 230,
-		width: 500,
+		height: 260,
+		width: 580,
 		modal: true,
 		buttons: {
 			"Add/Update link key": function() {
 				var bValid = true;
+				var hasKeyInput = false;
 				allFields.removeClass( "ui-state-error" );
 				bValid = bValid && checkLength( addmacaddr, "MAC address", 16 );
 				bValid = bValid && checkRegexp( addmacaddr, /^([0-9a-fA-F])+$/, "MAC address must be in hex." );
-				bValid = bValid && checkLength( addpreconfkey, "pre-configured link key", 32 );
-				bValid = bValid && checkRegexp( addpreconfkey, /^([0-9a-fA-F])+$/, "Link key must be in hex." );
-				if ( bValid ) {
+				if ( addinstallcode.val().length != 0 ) {
+					hasKeyInput = true;
+					if (( addinstallcode.val().length != 6*2 ) &&
+					    ( addinstallcode.val().length != 8*2 ) &&
+					    ( addinstallcode.val().length != 12*2 ) &&
+					    ( addinstallcode.val().length != 16*2 )) {
+						addinstallcode.addClass( "ui-state-error" );
+						updateTips( "Length of installation code must be 12, 16, 24, 32 characters." );
+						bValid = false;
+					}
+					bValid = bValid && checkRegexp( addinstallcode, /^([0-9a-fA-F])+$/, "Installation code must be in hex." );
+					if (!installCodeIsValid(addinstallcode.val())) {
+						addinstallcode.addClass( "ui-state-error" );
+						updateTips( "Installation code CRC error." );
+						bValid = false;
+					}
+				}
+				if ( addpreconfkey.val().length != 0 ) {
+					hasKeyInput = true;
+					bValid = bValid && checkLength( addpreconfkey, "pre-configured link key", 32 );
+					bValid = bValid && checkRegexp( addpreconfkey, /^([0-9a-fA-F])+$/, "Link key must be in hex." );
+				}
+				if (( bValid ) && ( hasKeyInput )) {
 					var jsonData = {};
 					jsonData["action"] = "addlinkkey";
 					jsonData["mac"] = addmacaddr.val();
-					jsonData["key"] = addpreconfkey.val();
+					if ( addinstallcode.val().length != 0 ) {
+						jsonData["icode"] = addinstallcode.val();
+					}
+					if ( addpreconfkey.val().length != 0 ) {
+						jsonData["pckey"] = addpreconfkey.val();
+					}
 					var args = JSON.stringify(jsonData);
 					//alert(args);
 					$( this ).dialog( "close" );
