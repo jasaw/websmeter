@@ -10,21 +10,20 @@ if __name__ == "__main__":
 
     debug_mode=False
 
-    try:
-        (opts, args) = getopt.getopt(sys.argv[1:], "d", ["debug"])
-    except getopt.error, why:
-        print "Error: getopt error: %s" % (why)
-        sys.exit(-1)
+    #try:
+    #    (opts, args) = getopt.getopt(sys.argv[1:], "d", ["debug"])
+    #except getopt.error, why:
+    #    print "Error: getopt error: %s" % (why)
+    #    sys.exit(-1)
 
-    try:
-        for opt in opts:
-            if opt[0] == "-d" or opt[0] == "--debug":
-                debug_mode = True
-                continue
-            sys.exit(-1)
-    except ValueError, why:
-        print "Error: bad parameter \"%s\" for option %s: %s" % (opt[1], opt[0], why)
-        sys.exit(-1)
+    #try:
+    #    for opt in opts:
+    #        if opt[0] == "-d" or opt[0] == "--debug":
+    #            debug_mode = True
+    #            continue
+    #        sys.exit(-1)
+    #except ValueError, why:
+    #    print "Error: bad parameter \"%s\" for option %s: %s" % (opt[1], opt[0], why)
+    #    sys.exit(-1)
 
     index.run(bin_path='smartmeter', dev_path='/dev/ttyUSB0', use_syslog=True, debug_mode=debug_mode)
-
