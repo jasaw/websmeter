@@ -1,5 +1,9 @@
 import web
-import simplejson as json
+try:
+    import json
+except ImportError:
+    import simplejson as json
+import json_custom_decode
 
 def getJsonArg(sArg, sDefault=""):
     """Picks out and returns a single value, regardless of GET or POST."""
@@ -7,7 +11,7 @@ def getJsonArg(sArg, sDefault=""):
         data = web.data()
         dic = None
         if data:
-            dic = json.loads(data)
+            dic = json.loads(data, object_hook=json_custom_decode.decode_unicode_to_str_dict)
         else:
             # maybe it was a GET?  check web.input()
             dic = dict(web.input())
