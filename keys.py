@@ -77,7 +77,7 @@ class action(object):
                 pckey = None
                 if zb_install_code_support:
                     icode = common.getJsonArg("icode", "")
-                    if isinstance(icode, str) and len(icode) >= 8 and all(c in string.hexdigits for c in icode):
+                    if isinstance(icode, str) and len(icode) >= 10 and all(c in string.hexdigits for c in icode):
                         try:
                             pckey = zigbeehashing.installcode_to_preconfkey(icode[:-4], icode[-4:])
                         except RuntimeError:

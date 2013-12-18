@@ -134,12 +134,12 @@ $(document).ready(function() {
 				bValid = bValid && checkRegexp( addmacaddr, /^([0-9a-fA-F])+$/, "MAC address must be in hex." );
 				if ( addinstallcode.val().length != 0 ) {
 					hasKeyInput = true;
-					if (( addinstallcode.val().length != 6*2 ) &&
-					    ( addinstallcode.val().length != 8*2 ) &&
-					    ( addinstallcode.val().length != 12*2 ) &&
-					    ( addinstallcode.val().length != 16*2 )) {
+					if (( addinstallcode.val().length != (6+2)*2 ) &&
+					    ( addinstallcode.val().length != (8+2)*2 ) &&
+					    ( addinstallcode.val().length != (12+2)*2 ) &&
+					    ( addinstallcode.val().length != (16+2)*2 )) {
 						addinstallcode.addClass( "ui-state-error" );
-						updateTips( "Length of installation code must be 12, 16, 24, 32 characters." );
+						updateTips( "Length of installation code must be 16, 20, 28, 36 characters. Last 4 characters are CRC." );
 						bValid = false;
 					}
 					bValid = bValid && checkRegexp( addinstallcode, /^([0-9a-fA-F])+$/, "Installation code must be in hex." );
